@@ -2,12 +2,12 @@
   <MenuLateral />
   <div class="contenedor-ausencias">
     <div>
-      <h2 class="mb-4">Mis Ausencias</h2>
+      <h2 class="mb-4">{{ esAdmin ? 'Ausencias del profesorado' : 'Mis Ausencias' }}</h2>
 
       <!-- Botones de control -->
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <!-- Botón para mostrar/ocultar formulario -->
-        <button class="btn btn-outline-primary" @click="mostrarFormulario = !mostrarFormulario">
+        <button v-if="!esAdmin" class="btn btn-outline-primary" @click="mostrarFormulario = !mostrarFormulario">
           {{ mostrarFormulario ? 'Ocultar formulario' : 'Crear Ausencia' }}
         </button>
 
@@ -22,7 +22,21 @@
               style="width: 120px;" />
             <button class="btn btn-outline-primary" @click="filtrarPorFechaAvanzado">Buscar</button>
             <button class="btn btn-outline-secondary" @click="resetearFiltro">Mostrar todas</button>
+            <button class="btn btn-outline-success" @click="exportarCsv" :disabled="ausenciasFiltradas.length === 0">
+              Exportar CSV
+            </button>
           </div>
+        </div>
+
+        <div v-if="esAdmin" class="filtro-profesor">
+          <label class="form-label mb-0">Filtrar por profesor:</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Nombre del profesor"
+            v-model="filtroProfesor"
+            style="min-width: 220px;"
+          />
         </div>
 
       </div>
@@ -31,7 +45,7 @@
     </div>
 
     <!-- Formulario para crear nueva ausencia -->
-    <div v-if="mostrarFormulario" class="card mb-4">
+    <div v-if="mostrarFormulario && !esAdmin" class="card mb-4">
       <div class="card-body">
         <h5 class="card-title">Registrar nueva ausencia</h5>
         <form @submit.prevent="crearAusencia">
@@ -70,7 +84,7 @@
           <div class="card">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <span>{{ formatFecha(ausenciaDia.fecha) }}</span>
-              <button class="btn btn-sm btn-danger" @click="eliminarAusencia({ fecha: ausenciaDia.fecha })">
+              <button v-if="!esAdmin" class="btn btn-sm btn-danger" @click="eliminarAusencia({ fecha: ausenciaDia.fecha })">
                 Eliminar
               </button>
             </div>
@@ -80,6 +94,7 @@
                 <thead class="table-light">
                   <tr>
                     <th scope="col">Hora</th>
+                    <th v-if="esAdmin" scope="col">Profesor</th>
                     <th scope="col">Asignatura</th>
                     <th scope="col">Aula</th>
                     <th scope="col">Curso</th>
@@ -93,6 +108,7 @@
                     <td>
                       {{ ausencia.horario.franja.horaInicio }} - {{ ausencia.horario.franja.horaFin }}
                     </td>
+                    <td v-if="esAdmin">{{ ausencia.horario.profesor?.nombre || '—' }}</td>
                     <td>{{ ausencia.horario.asignatura.nombre }}</td>
                     <td>{{ ausencia.horario.aula?.codigo || '—' }}</td>
                     <td>{{ ausencia.horario.curso?.nombre || '—' }}</td>
@@ -131,6 +147,12 @@ import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
 
+const esAdmin = computed(() => {
+  const rol = auth.usuario?.rol
+  if (!rol) return false
+  return String(rol).toLowerCase() === 'administrador'
+})
+
 
 // Ausencias y formulario
 const ausencias = ref([])
@@ -156,6 +178,7 @@ const ausenciasFiltradas = ref([])
 const filtroDia = ref('')
 const filtroMes = ref('')
 const filtroAnio = ref('')
+const filtroProfesor = ref('')
 
 
 const filtrarPorFechaAvanzado = () => {
@@ -176,6 +199,70 @@ const filtrarPorFechaAvanzado = () => {
 
     return coincideDia && coincideMes && coincideAnio
   })
+}
+
+function csvEscape(value) {
+  if (value === null || value === undefined) return ''
+  const str = String(value)
+  if (str.includes(';') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`
+  }
+  return str
+}
+
+function exportarCsv() {
+  if (!ausenciasFiltradas.value.length) return
+
+  const rows = [
+    [
+      'Fecha',
+      'Hora inicio',
+      'Hora fin',
+      ...(esAdmin.value ? ['Profesor'] : []),
+      'Asignatura',
+      'Aula',
+      'Curso',
+      'Motivo',
+      'Justificada'
+    ]
+  ]
+
+  for (const ausenciaDia of ausenciasOrdenadasFiltradas.value) {
+    for (const ausencia of ausenciaDia.lstAusenciaFecha || []) {
+      const horaInicio = ausencia?.horario?.franja?.horaInicio?.slice(0, 5) || ''
+      const horaFin = ausencia?.horario?.franja?.horaFin?.slice(0, 5) || ''
+      rows.push([
+        formatFecha(ausenciaDia.fecha),
+        horaInicio,
+        horaFin,
+        ...(esAdmin.value ? [ausencia?.horario?.profesor?.nombre || ''] : []),
+        ausencia?.horario?.asignatura?.nombre || '',
+        ausencia?.horario?.aula?.codigo || '',
+        ausencia?.horario?.curso?.nombre || '',
+        ausencia?.descripcion || '',
+        ausencia?.justificada ? 'Sí' : 'No'
+      ])
+    }
+  }
+
+  const csv = rows.map(row => row.map(csvEscape).join(';')).join('\n')
+  const bom = '\uFEFF'
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' })
+
+  const hoy = new Date()
+  const yyyy = hoy.getFullYear()
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0')
+  const dd = String(hoy.getDate()).padStart(2, '0')
+  const nombreArchivo = `ausencias-${yyyy}-${mm}-${dd}.csv`
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = nombreArchivo
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 
@@ -206,6 +293,7 @@ const mostrarModal = (titulo, mensaje, tipo = 'info') => {
 
 // Crear ausencia
 const crearAusencia = async () => {
+  if (esAdmin.value) return
   try {
     const dto = {
       fecha: nuevaAusencia.value.fecha,
@@ -273,9 +361,9 @@ const eliminarAusencia = async ({ id = null, fecha = null }) => {
 // Cargar ausencias
 const cargarAusencias = async () => {
   try {
-    console .log(auth.usuario.id)
-    const idUsuario = auth.usuario.id
-    const url = `http://localhost:8081/api/ausencias?idusuario=${idUsuario}`
+    const url = esAdmin.value
+      ? 'http://localhost:8081/api/ausencias/todas'
+      : `http://localhost:8081/api/ausencias?idusuario=${auth.usuario.id}`
 
     const response = await axios.get(url, {
       headers: {
@@ -293,8 +381,26 @@ const cargarAusencias = async () => {
 
 
 const ausenciasOrdenadasFiltradas = computed(() =>
-  [...ausenciasFiltradas.value].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+  filtrarPorProfesor([...ausenciasFiltradas.value])
+    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
 )
+
+function normalizarTexto(value) {
+  return String(value || '').toLowerCase().trim()
+}
+
+function filtrarPorProfesor(lista) {
+  if (!esAdmin.value || !filtroProfesor.value) return lista
+  const filtro = normalizarTexto(filtroProfesor.value)
+  return lista
+    .map(dia => {
+      const lstFiltrada = (dia.lstAusenciaFecha || []).filter(a =>
+        normalizarTexto(a?.horario?.profesor?.nombre).includes(filtro)
+      )
+      return { ...dia, lstAusenciaFecha: lstFiltrada }
+    })
+    .filter(dia => (dia.lstAusenciaFecha || []).length > 0)
+}
 
 
 // Utilidades
