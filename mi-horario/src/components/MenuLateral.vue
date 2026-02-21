@@ -139,7 +139,7 @@ function subirArchivoSelec(event) {
 
 
 
-//Esta función cierra el offcanvas lateral pero no funciona bien. Creo que el desarrollador metió esta función porque no sabía cómo cerrar el offcanvas al navegar o no lo hacía correctamente. De hecho, se puede ver en el navegador cómo el fondo se queda oscurecido y hay que hacer un par de clicks para continuar. Personalmente, creo que es mejor evitar el offcanvas y usar un menu clñásico controlando la hamburguesa cuando corresponda por tamaño de pantalla.
+//Esta funcion cierra el offcanvas lateral pero no funciona bien. Creo que el desarrollador metio esta funcion porque no sabia como cerrar el offcanvas al navegar o no lo hacia correctamente. De hecho, se puede ver en el navegador como el fondo se queda oscurecido y hay que hacer un par de clicks para continuar. Personalmente, creo que es mejor evitar el offcanvas y usar un menu clasico controlando la hamburguesa cuando corresponda por tamaño de pantalla.
 function cerrarOffcanvas() {
   /*const canvasEl = document.getElementById('sidePanel')
 
@@ -243,5 +243,5 @@ async function generarParteDiario() {
 </script>
 
 <style scoped>
-/* Puedes añadir estilos si deseas */
+/* Puedes anade estilos si deseas */
 </style>
