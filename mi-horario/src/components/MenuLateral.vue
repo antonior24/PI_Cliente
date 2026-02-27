@@ -19,9 +19,12 @@
     </div>
   </div>
 
+  <!-- Overlay invisible para cerrar al clic fuera -->
+  <div v-if="menuAbierto" class="overlay-invisible" @click="cerrarMenuAlClic"></div>
+
   <!-- Offcanvas lateral -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel" aria-labelledby="sidePanelLabel"
-    data-bs-backdrop="true" data-bs-keyboard="false">
+    data-bs-backdrop="false" data-bs-keyboard="false">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="sidePanelLabel">Menú lateral</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
@@ -33,8 +36,8 @@
       <router-link to="/home" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Inicio</router-link>
 
       <div v-if="auth.usuario?.rol === 'administrador'">
-        <button class="btn btn-primary w-100 mb-2" @click="abrirArchivoSelec">Subir archivo de datos</button>
-        <router-link to="/datos-profesorado" class="btn btn-primary w-100 mb-2" >Datos
+        <router-link to="/subir-archivo" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Subir archivo de datos</router-link>
+        <router-link to="/datos-profesorado" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Datos
           profesorado</router-link>
         <button class="btn btn-primary w-100 mb-2" @click="generarParteDiario">
           Generar partes diario
@@ -44,7 +47,7 @@
 
 
 
-      <router-link to="/mis-ausencias" class="btn btn-primary w-100 mb-2" >
+      <router-link to="/mis-ausencias" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
         Ausencia
       </router-link>
 
@@ -76,6 +79,7 @@ const auth = useAuthStore()
 const fileInput = ref(null)
 const cargando = ref(false)
 const router = useRouter()
+const menuAbierto = ref(false)
 
 
 onMounted(() => {
@@ -83,6 +87,17 @@ onMounted(() => {
   if (localStorage.getItem('mostrarModalImportacion') === '1') {
     mostrarModal('Importación exitosa', 'Archivo importado correctamente.', 'success')
     localStorage.removeItem('mostrarModalImportacion')
+  }
+
+  // Detectar cuando se abre/cierra el offcanvas
+  const sidePanelEl = document.getElementById('sidePanel')
+  if (sidePanelEl) {
+    sidePanelEl.addEventListener('shown.bs.offcanvas', () => {
+      menuAbierto.value = true
+    })
+    sidePanelEl.addEventListener('hidden.bs.offcanvas', () => {
+      menuAbierto.value = false
+    })
   }
 
   // Cerrar offcanvas por si quedó abierto
@@ -141,9 +156,10 @@ function subirArchivoSelec(event) {
 
 //Esta funcion cierra el offcanvas lateral pero no funciona bien. Creo que el desarrollador metio esta funcion porque no sabia como cerrar el offcanvas al navegar o no lo hacia correctamente. De hecho, se puede ver en el navegador como el fondo se queda oscurecido y hay que hacer un par de clicks para continuar. Personalmente, creo que es mejor evitar el offcanvas y usar un menu clasico controlando la hamburguesa cuando corresponda por tamaño de pantalla.
 function cerrarOffcanvas() {
-  /*const canvasEl = document.getElementById('sidePanel')
+  // Usa la API de Bootstrap para cerrar correctamente el offcanvas
+  const canvasEl = document.getElementById('sidePanel')
 
-  if (canvasEl) {
+  if (canvasEl && typeof bootstrap !== 'undefined') {
     let offcanvas = bootstrap.Offcanvas.getInstance(canvasEl)
     if (!offcanvas) {
       offcanvas = new bootstrap.Offcanvas(canvasEl)
@@ -151,20 +167,14 @@ function cerrarOffcanvas() {
     try {
       offcanvas.hide()
     } catch (e) {
-      // por si el offcanvas ya estaba cerrado
       console.warn('No se pudo cerrar el offcanvas:', e)
     }
   }
+}
 
-  // Elimina manualmente el backdrop si existe
-  const backdrop = document.querySelector('.offcanvas-backdrop')
-  if (backdrop?.parentNode) {
-    backdrop.parentNode.removeChild(backdrop)
-  }
-*/
-  // Limpia clases y estilos que podrían bloquear la vista
-  //document.body.classList.remove('offcanvas-backdrop', 'modal-open')
-
+function cerrarMenuAlClic() {
+  // Cerrar el offcanvas cuando se hace clic en el overlay
+  cerrarOffcanvas()
 }
 
 /*
@@ -244,4 +254,15 @@ async function generarParteDiario() {
 
 <style scoped>
 /* Puedes anade estilos si deseas */
+/* Overlay invisible para cerrar el menú al clic fuera */
+.overlay-invisible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  z-index: 1040;
+  cursor: pointer;
+}
 </style>

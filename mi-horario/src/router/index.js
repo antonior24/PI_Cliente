@@ -7,6 +7,7 @@ import datosprofesor from '../views/DatosProfesor.vue'
 import FormularioUsuarioView from '../views/FormularioUsuarioView.vue'
 import AusenciasProfesorView from '../views/AusenciasProfesorView.vue'
 import DatosUsuarioView from '../views/DatosUsuarioView.vue'
+import SubirArchivoView from '../views/SubirArchivoView.vue'
 
 
 
@@ -21,6 +22,7 @@ const routes = [
   { path: '/formulario/:id', component: FormularioUsuarioView },
   { path: '/mis-ausencias', component: AusenciasProfesorView },
   { path: '/datosusuario/:id', component: DatosUsuarioView },
+  { path: '/subir-archivo', component: SubirArchivoView },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ]
 
