@@ -222,8 +222,8 @@ async function cambiarPassword() {
 
   try {
     const response = await axios.put(
-      `http://localhost:8081/api/usuarios/${auth.usuario.id}/cambiar-contraseña`,
-      { nuevaContraseña: nuevaPassword.value },
+      `http://localhost:8081/api/usuarios/${auth.usuario.id}/cambiar-Contrasena`,
+      { nuevaContrasena: nuevaPassword.value },
       {
         headers: { Authorization: `Bearer ${auth.token}` }
       }

@@ -1,15 +1,15 @@
 <template>
   <div v-if="visible" class="modal-overlay">
     <div class="modal-content modal-warning">
-      <h5 class="mb-3">⚠️ Cambio de Contraseña Obligatorio</h5>
+      <h5 class="mb-3">⚠️ Cambio de Contrasena Obligatorio</h5>
       <!-- Mensaje de error -->
       <div v-if="error" class="text-danger mb-2 text-start" style="font-size: 0.9rem;">
         {{ error }}
       </div>
-      <input v-model="nuevaPassword" type="password" class="form-control mb-3" placeholder="Nueva contraseña" />
+      <input v-model="nuevaPassword" type="password" class="form-control mb-3" placeholder="Nueva contrasena" />
       <input v-model="confirmacionPassword" type="password" class="form-control mb-3"
-        placeholder="Confirmar contraseña" />
-      <button class="btn btn-primary w-100" @click="cambiar">Cambiar contraseña</button>
+        placeholder="Confirmar contrasena" />
+      <button class="btn btn-primary w-100" @click="cambiar">Cambiar contrasena</button>
     </div>
   </div>
 
@@ -61,35 +61,35 @@ async function cambiar() {
 
   // Validación (puedes activarla si la necesitas)
   if (!nuevaPassword.value || nuevaPassword.value.length < 6) {
-    error.value = 'La contraseña debe tener al menos 6 caracteres'
+    error.value = 'La contrasena debe tener al menos 6 caracteres'
     return
   }
 
   if (nuevaPassword.value !== confirmacionPassword.value) {
-    error.value = 'Las contraseñas no coinciden'
+    error.value = 'Las contrasenas no coinciden'
     return
   }
 
   try {
-    const response = await api.put(`/usuarios/${auth.usuario.id}/cambiar-contraseña`, {
-      nuevaContraseña: nuevaPassword.value
+    const response = await api.put(`/usuarios/${auth.usuario.id}/cambiar-Contrasena`, {
+      nuevaContrasena: nuevaPassword.value
     })
 
     console.log(' Respuesta del backend:', response)
     console.log('📨 Datos:', response.data)
 
     // Actualizar auth store y localStorage
-    auth.usuario.cambiarContraseña = false
+    auth.usuario.cambiarContrasena = false
     localStorage.setItem('usuario', JSON.stringify(auth.usuario))
 
     emit('cerrar')
 
-    mostrarModal('Contraseña Modificada', 'Contraseña cambiada correctamente', 'success') // modalmensaje
+    mostrarModal('Contrasena Modificada', 'Contrasena cambiada correctamente', 'success') // modalmensaje
   } catch (err) {
-    console.error('Error al cambiar contraseña:', err)
-    const mensajeError = err.response?.data?.mensaje || 'Error al cambiar la contraseña'
+    console.error('Error al cambiar contrasena:', err)
+    const mensajeError = err.response?.data?.mensaje || err.response?.data || 'Error al cambiar la contraseña'
     error.value = mensajeError
-    mostrarModal('Error al cambiar contraseña', mensajeError, 'error') // modalmensaje
+    mostrarModal('Error al cambiar contrasena', mensajeError, 'error') // modalmensaje
   }
 }
 
