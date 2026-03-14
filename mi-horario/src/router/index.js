@@ -8,6 +8,7 @@ import FormularioUsuarioView from '../views/FormularioUsuarioView.vue'
 import AusenciasProfesorView from '../views/AusenciasProfesorView.vue'
 import DatosUsuarioView from '../views/DatosUsuarioView.vue'
 import SubirArchivoView from '../views/SubirArchivoView.vue'
+import { trackEvento } from '../utils/tracker'
 
 
 
@@ -23,6 +24,7 @@ const routes = [
   { path: '/mis-ausencias', component: AusenciasProfesorView },
   { path: '/datosusuario/:id', component: DatosUsuarioView },
   { path: '/subir-archivo', component: SubirArchivoView },
+  { path: '/informes', component: () => import('../views/InformesView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ]
 
@@ -30,5 +32,9 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+router.afterEach((to) => {
+  trackEvento('VISTA_PAGINA', { nombre: to.path });
+});
 
 export default router

@@ -11,7 +11,6 @@
         <div
           class="drop-zone"
           :class="{ 'drag-over': isDragOver }"
-          @click="triggerFileInput"
           @dragover.prevent="isDragOver = true"
           @dragleave.prevent="isDragOver = false"
           @drop.prevent="handleDrop"
@@ -30,13 +29,13 @@
             type="file"
             class="file-input"
             @change="handleFileSelect"
-            accept=".xlsx,.xls,.csv,.txt"
+            accept=".xlsx,.xls,.csv"
           />
         </div>
 
         <!-- Información de archivos soportados -->
         <div class="mt-4 alert alert-info">
-          <strong>📋 Formatos soportados:</strong> .xlsx, .xls, .csv, .txt
+          <strong>📋 Formatos soportados:</strong> .xlsx, .xls, .csv
         </div>
 
         <!-- Previsualización del archivo seleccionado -->
@@ -129,13 +128,6 @@ function handleFileSelect(event) {
   const files = event.target.files
   if (files.length > 0) {
     selectedFile.value = files[0]
-  }
-}
-
-// when the drop zone is clicked, forward the click to the hidden file input
-function triggerFileInput() {
-  if (fileInput.value) {
-    fileInput.value.click()
   }
 }
 
