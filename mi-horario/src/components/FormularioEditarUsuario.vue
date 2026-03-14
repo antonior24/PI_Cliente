@@ -53,14 +53,14 @@ const props = defineProps({
 
 const form = reactive({
   email: props.profesor.usuario.email ,
-  password: '',  // La contraseña puede ser opcional
+  password: '',  // La contrasena puede ser opcional
   rol: props.profesor.usuario.rol
 })
 
 // Usar un watcher para actualizar el formulario cada vez que cambie el profesor
 watch(() => props.profesor, (nuevoProfesor) => {
   form.email = nuevoProfesor?.usuario?.email || '';  // Actualiza el email con los nuevos valores
-  form.password = '';  // Puedes limpiar la contraseña si es necesario
+  form.password = '';  // Puedes limpiar la contrasena si es necesario
   form.rol = nuevoProfesor?.usuario?.rol || '';  // Actualiza el rol
 }, { immediate: true });  // Con 'immediate: true', se ejecutará también en la inicialización
 
@@ -71,7 +71,7 @@ function enviar() {
     nombre: props.profesor.nombre,          // Pasar el nombre del profesor (no del formulario)
     email: form.email,                      // Pasar el email desde el formulario
     rol: form.rol,                          // Pasar el rol desde el formulario
-    password: form.password || "",         // Si no hay contraseña, enviar una cadena vacía
+    password: form.password || "",         // Si no hay contrasena, enviar una cadena vacia
   });
 }
 
