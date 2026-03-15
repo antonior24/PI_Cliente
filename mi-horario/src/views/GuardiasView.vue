@@ -176,7 +176,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 
 const formularioGuardia = ref({
@@ -199,27 +199,30 @@ const puntosCalculados = computed(() => {
 
 const numeroGuardias = computed(() => guardiasRegistradas.value.length)
 
-// Cargar horarios disponibles
+// Cargar horarios disponibles para guardia (con ausencias y que coincidan con el horario del profesor)
 async function cargarHorarios() {
   cargandoHorarios.value = true
   mensaje.value = { tipo: '', texto: '' }
   try {
-    console.log('🔄 Fetching: /api/horarios/mis-horarios')
-    const response = await axios.get('http://localhost:8081/api/horarios/mis-horarios', {
+    // Obtener la fecha del formulario, si no hay seleccionada usar hoy
+    const fechaParam = formularioGuardia.value.fecha || new Date().toISOString().split('T')[0]
+    
+    console.log('🔄 Fetching horarios disponibles para guardia en fecha:', fechaParam)
+    const response = await axios.get(`http://localhost:8081/api/guardias/horarios-disponibles?fecha=${fechaParam}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
       }
     })
 
-    console.log('📚 Horarios recibidos del backend:', response.data)
+    console.log('📚 Horarios disponibles recibidos del backend:', response.data)
 
     if (!response.data || response.data.length === 0) {
       console.warn('⚠️ No hay horarios asignados al profesor')
       horariosDisponibles.value = []
       mensaje.value = {
-        tipo: 'warning',
-        texto: 'No hay horarios disponibles. Asegúrate de que tienes clases asignadas.'
+        tipo: 'info',
+        texto: 'No hay clases con ausencias disponibles para guardia en esa fecha. Verifica que:\n1. Tengas guardia asignada en tu horario\n2. Exista una ausencia registrada para esa fecha'
       }
       return
     }
@@ -242,21 +245,21 @@ async function cargarHorarios() {
         dia: h.dia || '—'
       }))
 
-    console.log('✅ Horarios procesados:', horariosDisponibles.value)
+    console.log('✅ Horarios disponibles procesados:', horariosDisponibles.value)
 
     if (horariosDisponibles.value.length === 0) {
       mensaje.value = {
         tipo: 'warning',
-        texto: 'No hay horarios con curso asignado.'
+        texto: 'No hay clases disponibles para cubrir guardia en esa fecha.'
       }
     }
   } catch (error) {
-    console.error('❌ Error al cargar horarios:', error)
+    console.error('❌ Error al cargar horarios disponibles:', error)
     console.error('Status:', error.response?.status)
     console.error('Data:', error.response?.data)
     console.error('Message:', error.message)
 
-    let mensajeError = 'Error al cargar los horarios disponibles'
+    let mensajeError = 'Error al cargar los horarios disponibles para guardia'
     
     if (error.response?.status === 401) {
       mensajeError = 'Sesión expirada. Por favor, inicia sesión de nuevo.'
@@ -420,6 +423,14 @@ onMounted(() => {
   cargarGuardias()
   sincronizarPuntos()
 })
+
+// Watcher para recargar horarios cuando cambie la fecha
+watch(() => formularioGuardia.value.fecha, () => {
+  if (formularioGuardia.value.fecha) {
+    cargarHorarios()
+  }
+})
+
 </script>
 
 <style scoped>
