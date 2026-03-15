@@ -11,6 +11,7 @@ import SubirArchivoView from '../views/SubirArchivoView.vue'
 import { trackEvento } from '../utils/tracker'
 
 
+import HorarioAIView from '../views/HorarioAIView.vue'
 
 
 const routes = [
@@ -25,6 +26,7 @@ const routes = [
   { path: '/datosusuario/:id', component: DatosUsuarioView },
   { path: '/subir-archivo', component: SubirArchivoView },
   { path: '/informes', component: () => import('../views/InformesView.vue') },
+  { path: '/horario/ia', component: HorarioAIView },
   { path: '/:pathMatch(.*)*', redirect: '/home' },
 ]
 

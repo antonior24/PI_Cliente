@@ -37,6 +37,10 @@
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
         <ul class="navbar-nav">
 
+          <li class="nav-item">
+            <router-link class="nav-link" to="/horario/ia">Horario IA</router-link>
+          </li>
+
           <!-- DROPDOWN DE PERFIL -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="perfilDropdown" role="button"
