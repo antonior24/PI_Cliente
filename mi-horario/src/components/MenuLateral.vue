@@ -51,6 +51,10 @@
         Ausencia
       </router-link>
 
+      <router-link to="/guardias" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
+        📋 Guardias
+      </router-link>
+
     </div>
   </div>
   

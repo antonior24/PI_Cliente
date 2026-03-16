@@ -11,6 +11,7 @@ import SubirArchivoView from '../views/SubirArchivoView.vue'
 import { trackEvento } from '../utils/tracker'
 
 
+import GuardiasView from '../views/GuardiasView.vue'
 import HorarioAIView from '../views/HorarioAIView.vue'
 
 
@@ -23,6 +24,7 @@ const routes = [
   { path: '/profesor/:id', component: datosprofesor },
   { path: '/formulario/:id', component: FormularioUsuarioView },
   { path: '/mis-ausencias', component: AusenciasProfesorView },
+  { path: '/guardias', component: GuardiasView },
   { path: '/datosusuario/:id', component: DatosUsuarioView },
   { path: '/subir-archivo', component: SubirArchivoView },
   { path: '/informes', component: () => import('../views/InformesView.vue') },
