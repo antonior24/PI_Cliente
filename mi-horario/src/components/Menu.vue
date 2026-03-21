@@ -40,6 +40,9 @@
           <li class="nav-item">
             <router-link class="nav-link" to="/horario/ia">Horario IA</router-link>
           </li>
+          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item">
+            <router-link class="nav-link" to="/mis-horario">Mis horarios</router-link>
+          </li>
 
           <!-- DROPDOWN DE PERFIL -->
           <li class="nav-item dropdown">

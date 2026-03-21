@@ -13,6 +13,8 @@ import { trackEvento } from '../utils/tracker'
 
 import GuardiasView from '../views/GuardiasView.vue'
 import HorarioAIView from '../views/HorarioAIView.vue'
+import MisHorariosView from '../views/MisHorariosView.vue'
+import { useAuthStore } from '../stores/auth'
 
 
 const routes = [
@@ -24,6 +26,7 @@ const routes = [
   { path: '/profesor/:id', component: datosprofesor },
   { path: '/formulario/:id', component: FormularioUsuarioView },
   { path: '/mis-ausencias', component: AusenciasProfesorView },
+  { path: '/mis-horario', component: MisHorariosView, meta: { roles: ['profesor'] } },
   { path: '/guardias', component: GuardiasView },
   { path: '/datosusuario/:id', component: DatosUsuarioView },
   { path: '/subir-archivo', component: SubirArchivoView },
@@ -35,6 +38,28 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+  const requiereRoles = to.meta?.roles
+
+  if (requiereRoles && requiereRoles.length > 0) {
+    if (!auth.logueado) {
+      next('/login')
+      return
+    }
+
+    const rolUsuario = String(auth.usuario?.rol || '').toLowerCase()
+    const tieneAcceso = requiereRoles.some(r => rolUsuario === String(r).toLowerCase())
+
+    if (!tieneAcceso) {
+      next('/home')
+      return
+    }
+  }
+
+  next()
 })
 
 router.afterEach((to) => {
