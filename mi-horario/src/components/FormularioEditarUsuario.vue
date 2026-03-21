@@ -30,8 +30,8 @@
     </div>
 
     <div class="d-flex gap-2">
-      <button class="btn btn-primary w-100" :disabled="isLoading" @click="enviar">
-        {{ isLoading ? 'Guardando...' : 'Guardar cambios' }}
+      <button class="btn btn-primary w-100" :disabled="props.isLoading" @click="enviar">
+        {{ props.isLoading ? 'Guardando...' : 'Guardar cambios' }}
       </button>
     </div>
   </div>
