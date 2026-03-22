@@ -91,7 +91,8 @@ import axios from 'axios'
 const props = defineProps({
   idProfesor: { type: [Number, String], default: null },
   profesorId: { type: [Number, String], default: null },
-  fetchAll: { type: Boolean, default: false }
+  fetchAll: { type: Boolean, default: false },
+  misHorarios: { type: Boolean, default: false }
 })
 
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
@@ -157,21 +158,42 @@ onMounted(async () => {
   try {
     // Do not fetch the entire dataset by default. Fetch only when a professor id is provided
     // or when explicitly requested via fetchAll prop.
-    if (!effectiveIdProfesor && !props.fetchAll) {
+    if (!effectiveIdProfesor && !props.fetchAll && !props.misHorarios) {
       horario.value = []
       return
     }
 
-    const url = effectiveIdProfesor
-      ? `http://localhost:8081/api/horarios?idProfesor=${effectiveIdProfesor}`
-      : 'http://localhost:8081/api/horarios'
+    let url = 'http://localhost:8081/api/horarios'
+    if (effectiveIdProfesor) {
+      url = `http://localhost:8081/api/horarios?idProfesor=${effectiveIdProfesor}`
+    } else if (props.misHorarios) {
+      url = 'http://localhost:8081/api/horarios/mis-horarios'
+    }
 
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
 
     const diaMap = { L: 'Lunes', M: 'Martes', X: 'Miércoles', J: 'Jueves', V: 'Viernes' }
-    horario.value = response.data.map(item => ({ ...item, dia: diaMap[item.dia] || item.dia }))
+
+    const rawData = Array.isArray(response.data) ? response.data : []
+
+    if (props.misHorarios) {
+      horario.value = rawData.map(item => ({
+        id: item.id,
+        dia: diaMap[String(item.dia).toUpperCase()] || item.dia || '-',
+        franja: {
+          horaInicio: item.horaInicio ? item.horaInicio : '00:00:00',
+          horaFin: item.horaFin ? item.horaFin : '00:00:00'
+        },
+        aula: { codigo: item.aula || '-' },
+        curso: { nombre: item.curso || '-' },
+        asignatura: { nombre: item.asignatura || '-' },
+        puntos: item.puntos != null ? item.puntos : null
+      }))
+    } else {
+      horario.value = rawData.map(item => ({ ...item, dia: diaMap[item.dia] || item.dia }))
+    }
   } catch (error) {
     console.error('Error al cargar el horario:', error)
   }

@@ -35,7 +35,7 @@
 
       <router-link to="/home" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Inicio</router-link>
 
-      <div v-if="auth.usuario?.rol === 'administrador'">
+      <div v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'">
         <router-link to="/subir-archivo" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Subir archivo de datos</router-link>
         <router-link to="/datos-profesorado" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Datos
           profesorado</router-link>
@@ -45,7 +45,11 @@
 
       </div>
 
-
+      <div v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'">
+        <router-link to="/mis-horario" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
+          Mis horarios
+        </router-link>
+      </div>
 
       <router-link to="/mis-ausencias" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
         Ausencia
