@@ -6,12 +6,14 @@
         <FormularioCrearUsuario
           v-if="action === 'create'"
           :profesor="profesor"
+          :is-loading="isLoading"
           @guardar="guardarUsuario"
         />
   
         <FormularioEditarUsuario
           v-else
           :profesor="profesor"
+          :is-loading="isLoading"
           @actualizar="modificarUsuario"
         />
       </div>
@@ -36,6 +38,7 @@
   
   const profesor = ref(null)
   const action = ref(route.query.action || 'create')
+  const isLoading = ref(false)
   
   onMounted(async () => {
   try {
@@ -56,13 +59,39 @@
 })
 
   
-  // Agregá tu lógica para guardar o modificar si querés manejarla desde aquí
-  function guardarUsuario(payload) {
+  // Lógica para guardar o modificar usuario
+  async function guardarUsuario(payload) {
     console.log('Guardar (crear):', payload)
+    // Implementar si es necesario
   }
   
-  function modificarUsuario(payload) {
-    console.log('Guardar (editar):', payload)
+  async function modificarUsuario(payload) {
+    console.log('Modificar usuario:', payload)
+    isLoading.value = true
+    try {
+      const response = await axios.put(
+        `http://localhost:8081/api/usuarios/${payload.idUsuario}`,
+        {
+          nombre: payload.nombre,
+          email: payload.email,
+          password: payload.password || null,
+          rol: payload.rol
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      )
+      console.log('✅ Usuario actualizado:', response.data)
+      alert('Usuario actualizado correctamente')
+      router.push('/datos-profesorado')
+    } catch (error) {
+      console.error('❌ Error al actualizar usuario:', error)
+      alert('Error al actualizar usuario: ' + (error.response?.data || error.message))
+    } finally {
+      isLoading.value = false
+    }
   }
   </script>
   
