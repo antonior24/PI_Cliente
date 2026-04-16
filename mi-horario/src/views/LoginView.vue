@@ -40,8 +40,18 @@
             <input v-model="correo" type="email" class="form-control mb-3" placeholder="Introduce tu correo" required />
             <button type="submit" class="btn btn-primary w-100 mt-2">Enviar</button>
           </form>
-          <div v-if="mensaje" class="alert alert-info mt-3 text-center">
-            {{ mensaje }}
+          <div v-if="mensaje" class="alert mt-3" :class="mensaje.includes('❌') ? 'alert-danger' : 'alert-info'">
+            <div v-if="mensaje.includes('Contraseña temporal')" class="text-start">
+              <p class="mb-2" v-for="(linea, index) in mensaje.split('\\n')" :key="index">
+                <span v-if="linea.includes('Contraseña temporal')" class="fw-bold">
+                  {{ linea }}
+                </span>
+                <span v-else>{{ linea }}</span>
+              </p>
+            </div>
+            <div v-else class="text-center">
+              {{ mensaje }}
+            </div>
           </div>
           <div class="text-center mt-3">
             <a href="#" @click.prevent="mostrarRecuperacion = false" class="text-secondary text-decoration-none">
@@ -101,15 +111,31 @@ async function enviarCorreo() {
       correoRecuperacion: correo.value
     })
 
-    console.log(' Respuesta del backend:', response)        // Muestra toda la respuesta
-    console.log('📨 response.data:', response.data)           // Muestra el cuerpo (JSON)
+    console.log(' Respuesta del backend:', response)
+    console.log('📨 response.data:', response.data)
 
-    mensaje.value = response.data
+    const datos = response.data
+
+    // Si está en desarrollo y hay una contraseña temporal, mostrarla
+    if (datos.ambiente === 'desarrollo' && datos.contraseñaTemporal) {
+      mensaje.value = `✅ ${datos.mensaje}\n\n🔐 Contraseña temporal: ${datos.contraseñaTemporal}`
+    } else if (datos.ambiente === 'produccion') {
+      // En producción, solo mostrar el mensaje
+      mensaje.value = `✅ ${datos.mensaje}`
+    } else {
+      // Fallback
+      mensaje.value = datos.mensaje
+    }
   } catch (error) {
-    console.error(' Error completo:', error)                // Muestra error completo
-    console.log('⚠️ error.response:', error.response)         // Info útil del backend
+    console.error(' Error completo:', error)
+    console.log('⚠️ error.response:', error.response)
 
-    mensaje.value = error.response?.data.message
+    const datos = error.response?.data
+    if (datos && datos.mensaje) {
+      mensaje.value = `❌ ${datos.mensaje}`
+    } else {
+      mensaje.value = error.response?.data || 'Error al procesar la solicitud'
+    }
   }
 }
 
