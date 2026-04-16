@@ -84,6 +84,42 @@ const correo = ref('')
 const mensaje = ref('')
 const mostrarRecuperacion = ref(false)
 
+function construirMensajeExitoRecuperacion(data) {
+  if (typeof data === 'string') {
+    return `✅ ${data}`
+  }
+
+  if (!data || typeof data !== 'object') {
+    return '✅ Solicitud procesada correctamente'
+  }
+
+  const mensajeBase = data.mensaje ?? data.message ?? 'Solicitud procesada correctamente'
+  const ambiente = data.ambiente ?? data.environment
+  const contrasenaTemporal = data.contrasenaTemporal ?? data.temporaryPassword
+
+  if ((ambiente === 'desarrollo' || !ambiente) && contrasenaTemporal) {
+    return `✅ ${mensajeBase}\n\n🔐 Contraseña temporal: ${contrasenaTemporal}`
+  }
+
+  return `✅ ${mensajeBase}`
+}
+
+function construirMensajeErrorRecuperacion(data) {
+  if (typeof data === 'string') {
+    return `❌ ${data}`
+  }
+
+  if (data?.mensaje) {
+    return `❌ ${data.mensaje}`
+  }
+
+  if (data?.message) {
+    return `❌ ${data.message}`
+  }
+
+  return '❌ Error al procesar la solicitud'
+}
+
 async function login() {
   errorLogin.value = false
 
@@ -107,35 +143,13 @@ async function login() {
 async function enviarCorreo() {
   mensaje.value = ''
   try {
-    const response = await axios.post('http://localhost:8081/api/recuperacion-password', {
+    const { data } = await axios.post('http://localhost:8081/api/recuperacion-password', {
       correoRecuperacion: correo.value
     })
 
-    console.log(' Respuesta del backend:', response)
-    console.log('📨 response.data:', response.data)
-
-    const datos = response.data
-
-    // Si está en desarrollo y hay una contraseña temporal, mostrarla
-    if (datos.ambiente === 'desarrollo' && datos.contraseñaTemporal) {
-      mensaje.value = `✅ ${datos.mensaje}\n\n🔐 Contraseña temporal: ${datos.contraseñaTemporal}`
-    } else if (datos.ambiente === 'produccion') {
-      // En producción, solo mostrar el mensaje
-      mensaje.value = `✅ ${datos.mensaje}`
-    } else {
-      // Fallback
-      mensaje.value = datos.mensaje
-    }
+    mensaje.value = construirMensajeExitoRecuperacion(data)
   } catch (error) {
-    console.error(' Error completo:', error)
-    console.log('⚠️ error.response:', error.response)
-
-    const datos = error.response?.data
-    if (datos && datos.mensaje) {
-      mensaje.value = `❌ ${datos.mensaje}`
-    } else {
-      mensaje.value = error.response?.data || 'Error al procesar la solicitud'
-    }
+    mensaje.value = construirMensajeErrorRecuperacion(error.response?.data)
   }
 }
 
@@ -189,4 +203,3 @@ async function enviarCorreo() {
   z-index: 3;
 }
 </style>
-
