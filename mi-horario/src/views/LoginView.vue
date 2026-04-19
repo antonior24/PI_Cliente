@@ -40,8 +40,18 @@
             <input v-model="correo" type="email" class="form-control mb-3" placeholder="Introduce tu correo" required />
             <button type="submit" class="btn btn-primary w-100 mt-2">Enviar</button>
           </form>
-          <div v-if="mensaje" class="alert alert-info mt-3 text-center">
-            {{ mensaje }}
+          <div v-if="mensaje" class="alert mt-3" :class="mensaje.includes('❌') ? 'alert-danger' : 'alert-info'">
+            <div v-if="mensaje.includes('Contraseña temporal')" class="text-start">
+              <p class="mb-2" v-for="(linea, index) in mensaje.split('\\n')" :key="index">
+                <span v-if="linea.includes('Contraseña temporal')" class="fw-bold">
+                  {{ linea }}
+                </span>
+                <span v-else>{{ linea }}</span>
+              </p>
+            </div>
+            <div v-else class="text-center">
+              {{ mensaje }}
+            </div>
           </div>
           <div class="text-center mt-3">
             <a href="#" @click.prevent="mostrarRecuperacion = false" class="text-secondary text-decoration-none">
@@ -74,6 +84,42 @@ const correo = ref('')
 const mensaje = ref('')
 const mostrarRecuperacion = ref(false)
 
+function construirMensajeExitoRecuperacion(data) {
+  if (typeof data === 'string') {
+    return `✅ ${data}`
+  }
+
+  if (!data || typeof data !== 'object') {
+    return '✅ Solicitud procesada correctamente'
+  }
+
+  const mensajeBase = data.mensaje ?? data.message ?? 'Solicitud procesada correctamente'
+  const ambiente = data.ambiente ?? data.environment
+  const contrasenaTemporal = data.contrasenaTemporal ?? data.temporaryPassword
+
+  if ((ambiente === 'testing' || ambiente === 'desarrollo' || !ambiente) && contrasenaTemporal) {
+    return `✅ ${mensajeBase}\n\n🔐 Contraseña temporal: ${contrasenaTemporal}`
+  }
+
+  return `✅ ${mensajeBase}`
+}
+
+function construirMensajeErrorRecuperacion(data) {
+  if (typeof data === 'string') {
+    return `❌ ${data}`
+  }
+
+  if (data?.mensaje) {
+    return `❌ ${data.mensaje}`
+  }
+
+  if (data?.message) {
+    return `❌ ${data.message}`
+  }
+
+  return '❌ Error al procesar la solicitud'
+}
+
 async function login() {
   errorLogin.value = false
 
@@ -97,19 +143,13 @@ async function login() {
 async function enviarCorreo() {
   mensaje.value = ''
   try {
-    const response = await axios.post('http://localhost:8081/api/recuperacion-password', {
+    const { data } = await axios.post('http://localhost:8081/api/recuperacion-password', {
       correoRecuperacion: correo.value
     })
 
-    console.log(' Respuesta del backend:', response)        // Muestra toda la respuesta
-    console.log('📨 response.data:', response.data)           // Muestra el cuerpo (JSON)
-
-    mensaje.value = response.data
+    mensaje.value = construirMensajeExitoRecuperacion(data)
   } catch (error) {
-    console.error(' Error completo:', error)                // Muestra error completo
-    console.log('⚠️ error.response:', error.response)         // Info útil del backend
-
-    mensaje.value = error.response?.data.message
+    mensaje.value = construirMensajeErrorRecuperacion(error.response?.data)
   }
 }
 
@@ -163,4 +203,3 @@ async function enviarCorreo() {
   z-index: 3;
 }
 </style>
-
