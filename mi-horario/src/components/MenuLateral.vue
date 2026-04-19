@@ -49,6 +49,9 @@
         <router-link to="/mis-horario" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
           Mis horarios
         </router-link>
+        <button class="btn btn-primary w-100 mb-2" @click="descargarHorarioPDF">
+          Descargar horario (PDF)
+        </button>
       </div>
 
       <router-link to="/mis-ausencias" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
@@ -251,6 +254,50 @@ async function generarParteDiario() {
   } catch (error) {
     console.error('Error al generar el parte diario:', error)
     mostrarModal('Error', 'No se pudo generar el parte diario.', 'error')
+  } finally {
+    cargando.value = false
+  }
+}
+
+async function descargarHorarioPDF() {
+  cargando.value = true
+  try {
+    const response = await axios.get('http://localhost:8081/api/horarios/pdf/mis-horarios', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      responseType: 'blob'
+    })
+
+    // Crear un blob con el PDF
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+
+    // Obtener el nombre del archivo desde el header Content-Disposition si está disponible
+    const contentDisposition = response.headers['content-disposition']
+    let nombreArchivo = 'horario.pdf'
+    
+    if (contentDisposition) {
+      const matches = contentDisposition.match(/filename=([^;]+)/)
+      if (matches && matches[1]) {
+        nombreArchivo = matches[1].replace(/"/g, '')
+      }
+    }
+
+    // Descargar el PDF
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nombreArchivo
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    mostrarModal('Éxito', 'Horario descargado correctamente.', 'success')
+
+  } catch (error) {
+    console.error('Error al descargar el horario PDF:', error)
+    mostrarModal('Error', 'No se pudo descargar el horario en PDF.', 'error')
   } finally {
     cargando.value = false
   }
