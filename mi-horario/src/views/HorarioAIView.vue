@@ -1,5 +1,6 @@
 <template>
   <div class="container mt-5">
+    <br>
     <h2>Consultas de IA sobre mi horario</h2>
     <div class="mb-3">
       <textarea v-model="pregunta" class="form-control" rows="4" placeholder="Escribe tu pregunta aquí"></textarea>
