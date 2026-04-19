@@ -1,6 +1,4 @@
 <template>
-  <MenuLateral />
-
   <div class="container mt-5 pt-5">
     <div class="row justify-content-center">
       <div class="col-md-8">
@@ -87,7 +85,6 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import MenuLateral from '../components/MenuLateral.vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
 
 const router = useRouter()

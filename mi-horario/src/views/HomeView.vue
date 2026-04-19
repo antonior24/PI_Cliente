@@ -1,5 +1,4 @@
 <template>
-  <MenuLateral />
   <ModalCambioContraseña :visible="mostrarModal" @cerrar="mostrarModal = false" />
   <div class="mx-4" style="margin-top: 150px;">
     <!-- Evitar cargar todo el horario sin filtro en la pantalla inicial -->
@@ -15,7 +14,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import MenuLateral from '../components/MenuLateral.vue'
 import Horario from '../components/Horario.vue'
 import ModalCambioContraseña from '../components/ModalCambioContraseña.vue'
 import { useAuthStore } from '../stores/auth'

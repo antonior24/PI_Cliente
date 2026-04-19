@@ -1,6 +1,4 @@
 <template>
-  <MenuLateral />
-
   <div class="container py-4">
     <h2>Mis horarios</h2>
 
@@ -18,7 +16,6 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import MenuLateral from '../components/MenuLateral.vue'
 import Horario from '../components/Horario.vue'
 
 const auth = useAuthStore()

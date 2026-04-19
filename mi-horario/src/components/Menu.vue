@@ -1,6 +1,6 @@
 <!-- src/components/Menu.vue -->
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top w-100 shadow">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top w-100">
     <div class="container-fluid">
 
       <!-- Logo -->
@@ -34,14 +34,84 @@
 
 
 
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav">
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- Items a la IZQUIERDA -->
+        <ul class="navbar-nav me-auto">
 
+          <!-- Inicio -->
+          <li class="nav-item">
+            <router-link class="nav-link" to="/home">Inicio</router-link>
+          </li>
+
+          <!-- Mis Ausencias -->
+          <li class="nav-item">
+            <router-link class="nav-link" to="/mis-ausencias">Ausencias</router-link>
+          </li>
+
+          <!-- Guardias -->
+          <li class="nav-item">
+            <router-link class="nav-link" to="/guardias">Guardias</router-link>
+          </li>
+
+          <!-- DROPDOWN PARA ADMINISTRADOR -->
+          <li v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'" class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Administración
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
+              <li>
+                <router-link class="dropdown-item" to="/datos-profesorado">
+                  Datos profesorado
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/subir-archivo">
+                  Subir archivo de datos
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/informes">
+                  Informes
+                </router-link>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="generarParteDiario">
+                  Generar partes diario
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+
+        <!-- Items a la DERECHA -->
+        <ul class="navbar-nav ms-auto">
+
+          <!-- Horario IA -->
           <li class="nav-item">
             <router-link class="nav-link" to="/horario/ia">Horario IA</router-link>
           </li>
-          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item">
-            <router-link class="nav-link" to="/mis-horario">Mis horarios</router-link>
+
+          <!-- DROPDOWN PARA PROFESOR (solo si es profesor) -->
+          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="profesorDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Mi cuenta
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profesorDropdown">
+              <li>
+                <router-link class="dropdown-item" to="/mis-horario">
+                  Mis horarios
+                </router-link>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="descargarHorarioPDF">
+                  Descargar horario (PDF)
+                </a>
+              </li>
+            </ul>
           </li>
 
           <!-- DROPDOWN DE PERFIL -->
@@ -54,31 +124,38 @@
                 style="width: 32px; height: 32px; object-fit: cover;" />
 
               <!-- Nombre: comienza siempre alineado a la izquierda -->
-              <span class="nombre-usuario" :title="auth.usuario.nombre">
+              <span class="nombre-usuario d-none d-lg-inline" :title="auth.usuario.nombre">
                 {{ auth.usuario.nombre }}
               </span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
               <li>
+                <router-link class="dropdown-item" to="/perfil">
+                  Mi perfil
+                </router-link>
+              </li>
+              <li>
                 <label for="inputFotoPerfil" class="dropdown-item" style="cursor: pointer;">
-                  👤 Subir foto de Perfil
+                  Subir foto de Perfil
                 </label>
                 <input id="inputFotoPerfil" type="file" accept="image/*" @change="subirImagen" style="display: none;" />
               </li>
-              <label class="dropdown-item" href="#" @click.prevent="mostrarModalPassword = true">🔐 Cambiar
-                contraseña</label>
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="mostrarModalPassword = true">
+                  Cambiar contraseña
+                </a>
+              </li>
               <li>
                 <hr class="dropdown-divider" />
               </li>
               <li>
                 <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
-                  🚪 Cerrar sesión
+                  Cerrar sesión
                 </a>
               </li>
             </ul>
           </li>
-
 
         </ul>
       </div>
@@ -120,8 +197,7 @@ import { ref, onMounted } from 'vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
 
 const imagenPerfil = ref(null)
-
-
+const cargando = ref(false)
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -254,67 +330,177 @@ async function cambiarPassword() {
   }
 }
 
+async function generarParteDiario() {
+  cargando.value = true
+  try {
+    const response = await axios.get('http://localhost:8081/api/parte-ausencias', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
 
+    const base64PDF = response.data
+    const byteCharacters = atob(base64PDF)
+    const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0))
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: 'application/pdf' })
 
+    // Formatear la fecha actual
+    const fecha = new Date()
+    const dia = String(fecha.getDate()).padStart(2, '0')
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+    const anio = fecha.getFullYear()
+    const nombreArchivo = `parte-ausencias-${dia}-${mes}-${anio}.pdf`
+
+    // Descargar el PDF con fecha en el nombre
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nombreArchivo
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    mostrarModal('Éxito', 'Parte diario generado correctamente.', 'success')
+  } catch (error) {
+    console.error('Error al generar el parte diario:', error)
+    mostrarModal('Error', 'No se pudo generar el parte diario.', 'error')
+  } finally {
+    cargando.value = false
+  }
+}
+
+async function descargarHorarioPDF() {
+  cargando.value = true
+  try {
+    const response = await axios.get('http://localhost:8081/api/horarios/pdf/mis-horarios', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      responseType: 'blob'
+    })
+
+    // Crear un blob con el PDF
+    const blob = new Blob([response.data], { type: 'application/pdf' })
+
+    // Obtener el nombre del archivo desde el header Content-Disposition si está disponible
+    const contentDisposition = response.headers['content-disposition']
+    let nombreArchivo = 'horario.pdf'
+    
+    if (contentDisposition) {
+      const matches = contentDisposition.match(/filename=([^;]+)/)
+      if (matches && matches[1]) {
+        nombreArchivo = matches[1].replace(/"/g, '')
+      }
+    }
+
+    // Descargar el PDF
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nombreArchivo
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    mostrarModal('Éxito', 'Horario descargado correctamente.', 'success')
+  } catch (error) {
+    console.error('Error al descargar el horario PDF:', error)
+    mostrarModal('Error', 'No se pudo descargar el horario en PDF.', 'error')
+  } finally {
+    cargando.value = false
+  }
+}
 </script>
 
 
 <style scoped>
-/* Mostrar dropdown al pasar el mouse (solo en escritorio) */
+/* Navbar general */
+.navbar {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  height: 70px;
+  z-index: 1055;
+}
+
 @media (min-width: 992px) {
   .navbar {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  height: 64px;
-  z-index: 1055; /* Añade esto */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    height: 70px;
+    z-index: 1055;
+  }
 }
 
-
-}
-
-/* Centrar dropdown en móviles y alinear mejor */
-.dropdown-menu {
-  right: 0;
-  left: auto;
-  transform: none;
-
-}
-
-/* Logo y título bien alineados */
+/* Logo y marca */
 .navbar-brand {
-  display: flex;
-  align-items: center;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
-.navbar-brand img {
-  height: 36px;
-  width: auto;
+/* Título de la app */
+.titulo-app {
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
-/* Nombre del usuario con truncamiento */
+/* Items del navbar */
+.navbar-nav .nav-link {
+  color: #fff !important;
+  margin: 0 0.5rem;
+  font-weight: 500;
+}
+
+.navbar-nav .nav-link.active {
+  color: #0d6efd !important;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 0.5rem;
+}
+
+.dropdown-menu-dark {
+  background-color: #2d3748;
+}
+
+.dropdown-menu-dark .dropdown-item {
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-menu-dark .dropdown-item:hover {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.dropdown-menu-dark .dropdown-item.active,
+.dropdown-menu-dark .dropdown-item:active {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.dropdown-menu-dark .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Nombre de usuario */
 .nombre-usuario {
   font-size: 0.95rem;
   min-width: 100px;
-  /* Espacio mínimo reservado */
   max-width: auto;
-  /* No crecer más allá de esto */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
-  /* Asegura que respeta el ancho */
 }
 
-
-
-/* Ajustes de navbar general */
-.navbar {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  height: 64px;
-}
-
-
+/* Modal overlay */
 .modal-overlay {
   position: fixed;
   top: 0;

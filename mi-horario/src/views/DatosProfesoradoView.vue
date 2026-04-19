@@ -1,6 +1,4 @@
 <template>
-  <MenuLateral />
-
   <div class=" mt-5 pt-4 px-3">
 
     <div class="mb-4 d-flex justify-content-center mt-5" style="margin-top: 200px;">
@@ -36,7 +34,6 @@
 
 
 <script setup>
-import MenuLateral from '../components/MenuLateral.vue'
 import BuscadorProfesores from '../components/BuscadorProfesores.vue'
 import TarjetaProfesor from '../components/TarjetaProfesor.vue'
 import ModalMensaje from '../components/ModalMensaje.vue'

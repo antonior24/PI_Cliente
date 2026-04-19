@@ -1,6 +1,4 @@
 <template>
-    <MenuLateral />
-
     <div class="container-xl mt-5 pt-4 px-3">
         <!-- Contenedor principal con margen horizontal -->
 
@@ -64,7 +62,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
-import MenuLateral from '../components/MenuLateral.vue'
 import Horario from '../components/Horario.vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
 import AusenciasProfesor from '../components/AusenciasProfesor.vue'
