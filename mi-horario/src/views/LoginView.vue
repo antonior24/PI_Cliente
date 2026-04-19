@@ -97,7 +97,7 @@ function construirMensajeExitoRecuperacion(data) {
   const ambiente = data.ambiente ?? data.environment
   const contrasenaTemporal = data.contrasenaTemporal ?? data.temporaryPassword
 
-  if ((ambiente === 'desarrollo' || !ambiente) && contrasenaTemporal) {
+  if ((ambiente === 'testing' || ambiente === 'desarrollo' || !ambiente) && contrasenaTemporal) {
     return `✅ ${mensajeBase}\n\n🔐 Contraseña temporal: ${contrasenaTemporal}`
   }
 
