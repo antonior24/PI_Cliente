@@ -1,5 +1,4 @@
 <template>
-  <MenuLateral />
   <div class="contenedor-ausencias">
     <div>
       <h2 class="mb-4">{{ esAdmin ? 'Ausencias del profesorado' : 'Mis Ausencias' }}</h2>
@@ -141,7 +140,6 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import ModalMensaje from '../components/ModalMensaje.vue'
-import MenuLateral from '../components/MenuLateral.vue'
 import { useAuthStore } from '../stores/auth'
 
 
