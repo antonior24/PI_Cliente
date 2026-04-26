@@ -8,10 +8,10 @@
         <img :src="logo" alt="Logo" height="36" class="me-2" />
 
         <!-- Título completo en escritorio -->
-        <span class="d-none d-lg-inline titulo-app">Horario IES Polígono Sur</span>
+        <span class="d-none d-lg-inline titulo-app">{{ t('app.fullTitle') }}</span>
 
         <!-- Título reducido en móvil -->
-        <span class="d-inline d-lg-none titulo-app">Polígono Sur</span>
+        <span class="d-inline d-lg-none titulo-app">{{ t('app.shortTitle') }}</span>
       </router-link>
 
 
@@ -40,45 +40,45 @@
 
           <!-- Inicio -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/home">Inicio</router-link>
+            <router-link class="nav-link" to="/home">{{ t('menu.home') }}</router-link>
           </li>
 
           <!-- Mis Ausencias -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/mis-ausencias">Ausencias</router-link>
+            <router-link class="nav-link" to="/mis-ausencias">{{ t('menu.absences') }}</router-link>
           </li>
 
           <!-- Guardias -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/guardias">Guardias</router-link>
+            <router-link class="nav-link" to="/guardias">{{ t('menu.guards') }}</router-link>
           </li>
 
           <!-- DROPDOWN PARA ADMINISTRADOR -->
           <li v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-              Administración
+              {{ t('menu.administration') }}
             </a>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
               <li>
                 <router-link class="dropdown-item" to="/datos-profesorado">
-                  Datos profesorado
+                  {{ t('menu.teacherData') }}
                 </router-link>
               </li>
               <li>
                 <router-link class="dropdown-item" to="/subir-archivo">
-                  Subir archivo de datos
+                  {{ t('menu.uploadData') }}
                 </router-link>
               </li>
               <li>
                 <router-link class="dropdown-item" to="/informes">
-                  Informes
+                  {{ t('menu.reports') }}
                 </router-link>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="#" @click.prevent="generarParteDiario">
-                  Generar partes diario
+                  {{ t('menu.dailyReports') }}
                 </a>
               </li>
             </ul>
@@ -91,24 +91,33 @@
 
           <!-- Horario IA -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/horario/ia">Horario IA</router-link>
+            <router-link class="nav-link" to="/horario/ia">{{ t('menu.aiSchedule') }}</router-link>
+          </li>
+
+          <li class="nav-item d-flex align-items-center ms-2">
+            <label class="text-white small me-2 d-none d-xl-inline">{{ t('menu.language') }}</label>
+            <select class="form-select form-select-sm bg-dark text-white border-secondary" :value="locale"
+              @change="setLocale($event.target.value)" aria-label="Seleccion de idioma" style="width: 90px;">
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
           </li>
 
           <!-- DROPDOWN PARA PROFESOR (solo si es profesor) -->
           <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="profesorDropdown" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-              Mi cuenta
+              {{ t('menu.myAccount') }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profesorDropdown">
               <li>
                 <router-link class="dropdown-item" to="/mis-horario">
-                  Mis horarios
+                  {{ t('menu.mySchedules') }}
                 </router-link>
               </li>
               <li>
                 <a class="dropdown-item" href="#" @click.prevent="descargarHorarioPDF">
-                  Descargar horario (PDF)
+                  {{ t('menu.downloadSchedulePdf') }}
                 </a>
               </li>
             </ul>
@@ -132,18 +141,18 @@
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
               <li>
                 <router-link class="dropdown-item" to="/perfil">
-                  Mi perfil
+                  {{ t('menu.myProfile') }}
                 </router-link>
               </li>
               <li>
                 <label for="inputFotoPerfil" class="dropdown-item" style="cursor: pointer;">
-                  Subir foto de Perfil
+                  {{ t('menu.uploadProfileImage') }}
                 </label>
                 <input id="inputFotoPerfil" type="file" accept="image/*" @change="subirImagen" style="display: none;" />
               </li>
               <li>
                 <a class="dropdown-item" href="#" @click.prevent="mostrarModalPassword = true">
-                  Cambiar contraseña
+                  {{ t('menu.changePassword') }}
                 </a>
               </li>
               <li>
@@ -151,7 +160,7 @@
               </li>
               <li>
                 <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
-                  Cerrar sesión
+                  {{ t('menu.logout') }}
                 </a>
               </li>
             </ul>
@@ -195,12 +204,14 @@ import { useAuthStore } from '../stores/auth'
 import logo from '../assets/logo_iespsur.jpeg'
 import { ref, onMounted } from 'vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
+import { useI18n } from '../composables/useI18n'
 
 const imagenPerfil = ref(null)
 const cargando = ref(false)
 
 const router = useRouter()
 const auth = useAuthStore()
+const { locale, setLocale, t } = useI18n()
 
 // 👇 Modal de mensajes
 const modalVisible = ref(false)

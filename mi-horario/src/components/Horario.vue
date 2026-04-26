@@ -5,8 +5,8 @@
       <table class="table table-bordered text-start align-middle w-100 small">
         <thead class="table-dark text-center">
           <tr>
-            <th style="width: 100px;">Franja</th>
-            <th v-for="dia in diasSemana" :key="dia" style="width: 130px;">{{ dia }}</th>
+            <th style="width: 100px;">{{ t('schedule.period') }}</th>
+            <th v-for="dia in diasSemana" :key="dia" style="width: 130px;">{{ traducirDia(dia) }}</th>
           </tr>
         </thead>
         <tbody>
@@ -21,13 +21,13 @@
                     ? obtenerEstilosAsignatura(getClases(dia, franja)[0].asignatura?.nombre)
                     : {}">
               <div v-if="esRecreo(franja)">
-                <strong>Recreo</strong>
+                <strong>{{ t('schedule.break') }}</strong>
               </div>
               <div v-else>
                 <div v-for="(clase, i) in getClases(dia, franja)" :key="i" class="mb-1">
-                  Aula: {{ clase.aula?.codigo || '-' }}<br />
-                  Curso: {{ clase.curso?.nombre || '-' }}<br />
-                  Asig: {{ clase.asignatura?.nombre || '-' }}
+                  {{ t('schedule.classroom') }}: {{ clase.aula?.codigo || '-' }}<br />
+                  {{ t('schedule.course') }}: {{ clase.curso?.nombre || '-' }}<br />
+                  {{ t('schedule.subject') }}: {{ clase.asignatura?.nombre || '-' }}
                   <hr v-if="getClases(dia, franja).length > 1 && i < getClases(dia, franja).length - 1" />
                 </div>
               </div>
@@ -41,14 +41,14 @@
     <div class="d-md-none">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <button class="btn btn-sm btn-outline-secondary" @click="diaAnterior" :disabled="diaActualIndex === 0">←</button>
-        <strong>{{ diasSemana[diaActualIndex] }}</strong>
+        <strong>{{ traducirDia(diaActual) }}</strong>
         <button class="btn btn-sm btn-outline-secondary" @click="diaSiguiente" :disabled="diaActualIndex === diasSemana.length - 1">→</button>
       </div>
       <table class="table table-bordered text-start align-middle w-100 small">
         <thead class="table-dark text-center">
           <tr>
-            <th style="width: 100px;">Franja</th>
-            <th style="width: 100%">Horario</th>
+            <th style="width: 100px;">{{ t('schedule.period') }}</th>
+            <th style="width: 100%">{{ t('schedule.schedule') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -63,13 +63,13 @@
                   ? obtenerEstilosAsignatura(getClases(diaActual, franja)[0].asignatura?.nombre)
                   : {}">
               <div v-if="esRecreo(franja)">
-                <strong>Recreo</strong>
+                <strong>{{ t('schedule.break') }}</strong>
               </div>
               <div v-else>
                 <div v-for="(clase, i) in getClases(diaActual, franja)" :key="i" class="mb-1">
-                  Aula: {{ clase.aula?.codigo || '-' }}<br />
-                  Curso: {{ clase.curso?.nombre || '-' }}<br />
-                  Asig: {{ clase.asignatura?.nombre || '-' }}
+                  {{ t('schedule.classroom') }}: {{ clase.aula?.codigo || '-' }}<br />
+                  {{ t('schedule.course') }}: {{ clase.curso?.nombre || '-' }}<br />
+                  {{ t('schedule.subject') }}: {{ clase.asignatura?.nombre || '-' }}
                   <hr v-if="getClases(diaActual, franja).length > 1 && i < getClases(diaActual, franja).length - 1" />
                 </div>
               </div>
@@ -86,6 +86,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import { useI18n } from '../composables/useI18n'
 
 // Props: accept either idProfesor or profesorId (kebab-case from parent), and an explicit fetchAll
 const props = defineProps({
@@ -94,6 +95,7 @@ const props = defineProps({
   fetchAll: { type: Boolean, default: false },
   misHorarios: { type: Boolean, default: false }
 })
+const { t } = useI18n()
 
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
 const diaActualIndex = ref(0)
@@ -134,6 +136,17 @@ function getClases(dia, franja) {
   return horario.value.filter(
     h => h.dia === dia && h.franja.horaInicio.slice(0, 5) === franja.horaInicio.slice(0, 5)
   )
+}
+
+function traducirDia(dia) {
+  const mapa = {
+    Lunes: t('days.monday'),
+    Martes: t('days.tuesday'),
+    Miércoles: t('days.wednesday'),
+    Jueves: t('days.thursday'),
+    Viernes: t('days.friday')
+  }
+  return mapa[dia] || dia
 }
 
 function esRecreo(franja) {

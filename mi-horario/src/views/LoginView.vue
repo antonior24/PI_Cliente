@@ -9,21 +9,21 @@
           </div>
           <form @submit.prevent="login">
             <div class="mb-3">
-              <label class="form-label text-muted">Correo Electrónico</label>
+              <label class="form-label text-muted">{{ t('auth.email') }}</label>
               <input v-model="username" type="text" class="form-control" required />
             </div>
             <div class="mb-3">
-              <label class="form-label text-muted">Contraseña</label>
+              <label class="form-label text-muted">{{ t('auth.password') }}</label>
               <input v-model="password" type="password" class="form-control" required />
             </div>
             <div v-if="errorLogin" class="text-danger text-center mb-3">
-              Credenciales incorrectas
+              {{ t('auth.wrongCredentials') }}
             </div>
-            <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
+            <button type="submit" class="btn btn-primary w-100">{{ t('auth.login') }}</button>
           </form>
           <div class="text-center mt-3">
             <a href="#" class="text-primary text-decoration-none" @click.prevent="mostrarRecuperacion = true">
-              He olvidado la contraseña
+              {{ t('auth.forgotPassword') }}
             </a>
           </div>
         </div>
@@ -33,12 +33,12 @@
           <div class="text-center mb-4">
             <img src="../assets/logo_iespsur.jpeg" alt="logo" style="width: 60px;" />
           </div>
-          <h5 class="mb-4">Recuperar contraseña</h5>
+          <h5 class="mb-4">{{ t('auth.recoverPassword') }}</h5>
           
-          <p class="mt-4">Escriba el correo de la contraseña olvidada</p>
+          <p class="mt-4">{{ t('auth.recoveryEmailPrompt') }}</p>
           <form @submit.prevent="enviarCorreo">
-            <input v-model="correo" type="email" class="form-control mb-3" placeholder="Introduce tu correo" required />
-            <button type="submit" class="btn btn-primary w-100 mt-2">Enviar</button>
+            <input v-model="correo" type="email" class="form-control mb-3" :placeholder="t('auth.enterEmail')" required />
+            <button type="submit" class="btn btn-primary w-100 mt-2">{{ t('auth.send') }}</button>
           </form>
           <div v-if="mensaje" class="alert mt-3" :class="mensaje.includes('❌') ? 'alert-danger' : 'alert-info'">
             <div v-if="mensaje.includes('Contraseña temporal')" class="text-start">
@@ -55,7 +55,7 @@
           </div>
           <div class="text-center mt-3">
             <a href="#" @click.prevent="mostrarRecuperacion = false" class="text-secondary text-decoration-none">
-              Volver al inicio de sesión
+              {{ t('auth.backToLogin') }}
             </a>
           </div>
         </div>
@@ -72,9 +72,11 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
+import { useI18n } from '../composables/useI18n'
 
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const username = ref('')
 const password = ref('')
