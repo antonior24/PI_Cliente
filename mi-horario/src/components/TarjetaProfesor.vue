@@ -1,7 +1,7 @@
 <template>
   <div
     class="card tarjeta-horizontal d-flex flex-column flex-md-row align-items-center justify-content-between p-3 shadow-sm mb-3"
-    @click="emit('verDetalles', profesor.idProfesor)" style="cursor: pointer;">
+    @click="emit('verDetalles', obtenerIdProfesor(profesor))" style="cursor: pointer;">
 
 
 
@@ -139,6 +139,10 @@ async function subirImagenProfesor(event) {
 // 👉 Manejador para abrir/cerrar el formulario
 function handleToggleFormulario(profesorId, action) {
   emit('toggleFormulario', { profesorId, action })
+}
+
+function obtenerIdProfesor(profesor) {
+  return profesor?.idProfesor ?? profesor?.id ?? profesor?.id_profesor ?? null
 }
 </script>
 

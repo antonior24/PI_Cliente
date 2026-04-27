@@ -13,8 +13,8 @@
       <!-- Lista de Profesores -->
       <div>
         <div d-flex flex-column align-items-center me-3>
-          <TarjetaProfesor v-for="profesor in resultados" :key="profesor.idProfesor" :profesor="profesor"
-            :profesorSeleccionado="profesorSeleccionado" :formulario="formularios[profesor.idProfesor] || {}"
+          <TarjetaProfesor v-for="profesor in resultados" :key="obtenerIdProfesor(profesor)" :profesor="profesor"
+            :profesorSeleccionado="profesorSeleccionado" :formulario="formularios[obtenerIdProfesor(profesor)] || {}"
             :errores="erroresFormulario" :isLoading="isLoading" @toggleFormulario="mostrarFormularioCrear"
             @guardarUsuario="guardarUsuario" @cancelarFormulario="cancelarFormulario" @eliminarUsuario="eliminarUsuario"
             @imagenSubida="obtenerTodosLosProfesores" @modificarUsuario="modificarUsuario"
@@ -302,7 +302,17 @@ async function modificarUsuario(datosFormulario) {
 
 
 function irADetallesUsuario(idProfesor) {
-  router.push(`/datosusuario/${idProfesor}`)
+  const id = Number(idProfesor)
+  if (!Number.isFinite(id) || id <= 0) {
+    mostrarModal('Error', 'No se pudo identificar el profesor seleccionado.', 'error')
+    return
+  }
+
+  router.push(`/datosusuario/${id}`)
+}
+
+function obtenerIdProfesor(profesor) {
+  return profesor?.idProfesor ?? profesor?.id ?? profesor?.id_profesor ?? null
 }
 
 
