@@ -102,11 +102,6 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profesorDropdown">
               <li>
-                <router-link class="dropdown-item" to="/mis-horario">
-                  Mis horarios
-                </router-link>
-              </li>
-              <li>
                 <a class="dropdown-item" href="#" @click.prevent="descargarHorarioPDF">
                   Descargar horario (PDF)
                 </a>
