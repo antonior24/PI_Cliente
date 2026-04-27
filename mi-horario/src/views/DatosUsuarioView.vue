@@ -35,7 +35,7 @@
 
         <!-- Horario -->
         <div class="mt-5">
-            <Horario :idProfesor="profesor?.idProfesor" />
+            <Horario :idProfesor="idProfesorEfectivo" />
 
             <!-- Botón para mostrar el formulario de ausencia -->
             <div class="text-center mt-4 mb-3">
@@ -45,7 +45,7 @@
             </div>
 
 
-            <FormularioCrearAusencia v-if="mostrarFormularioAusencia" :idProfesor="profesor?.idProfesor"
+            <FormularioCrearAusencia v-if="mostrarFormularioAusencia" :idProfesor="idProfesorEfectivo"
                 @ausenciaCreada="onAusenciaCreada" @error="mensaje => mostrarModal(' Error', mensaje, 'error')" />
 
             <AusenciasProfesor v-if="profesor?.usuario?.id" :idUsuario="profesor.usuario.id" :key="ausenciasKey" />
@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import Horario from '../components/Horario.vue'
@@ -88,6 +88,14 @@ const modal = ref({
     titulo: '',
     mensaje: '',
     tipo: 'info'
+})
+
+const idProfesorEfectivo = computed(() => {
+    const idDesdeProfesor = profesor.value?.idProfesor ?? profesor.value?.id ?? profesor.value?.id_profesor ?? null
+    if (idDesdeProfesor != null) return Number(idDesdeProfesor)
+
+    const idRuta = Number(route.params.id)
+    return Number.isFinite(idRuta) ? idRuta : null
 })
 
 function mostrarModal(titulo, mensaje, tipo = 'info') {
