@@ -192,6 +192,7 @@
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import api from '../axios'
 import logo from '../assets/logo_iespsur.jpeg'
 import { ref, onMounted } from 'vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
@@ -333,11 +334,7 @@ async function cambiarPassword() {
 async function generarParteDiario() {
   cargando.value = true
   try {
-    const response = await axios.get('http://localhost:8081/api/parte-ausencias', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    const response = await api.get('/parte-ausencias')
 
     const base64PDF = response.data
     const byteCharacters = atob(base64PDF)
@@ -374,10 +371,7 @@ async function generarParteDiario() {
 async function descargarHorarioPDF() {
   cargando.value = true
   try {
-    const response = await axios.get('http://localhost:8081/api/horarios/pdf/mis-horarios', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
+    const response = await api.get('/horarios/pdf/mis-horarios', {
       responseType: 'blob'
     })
 
@@ -408,7 +402,19 @@ async function descargarHorarioPDF() {
     mostrarModal('Éxito', 'Horario descargado correctamente.', 'success')
   } catch (error) {
     console.error('Error al descargar el horario PDF:', error)
-    mostrarModal('Error', 'No se pudo descargar el horario en PDF.', 'error')
+    let mensaje = 'No se pudo descargar el horario en PDF.'
+    if (error?.response?.data instanceof Blob) {
+      try {
+        const texto = await error.response.data.text()
+        const json = JSON.parse(texto)
+        mensaje = json?.error || json?.message || mensaje
+      } catch (e) {
+        mensaje = `Error ${error.response?.status || ''}`.trim() || mensaje
+      }
+    } else if (error?.response?.status) {
+      mensaje = `Error ${error.response.status}`
+    }
+    mostrarModal('Error', mensaje, 'error')
   } finally {
     cargando.value = false
   }
