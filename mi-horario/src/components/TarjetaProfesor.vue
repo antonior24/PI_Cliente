@@ -35,10 +35,12 @@
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from '../composables/useI18n'
 
 const auth = useAuthStore()
 const imagenProfesor = ref(null)
 const inputArchivo = ref(null)
+const { t } = useI18n()
 
 const props = defineProps({
   profesor: Object,
@@ -126,13 +128,13 @@ async function subirImagenProfesor(event) {
         }
       }
     )
-    alert(' Imagen actualizada')
+    alert(t('teacherData.imageUpdated'))
     cargarImagenProfesor()
     emit('imagenSubida') //  Dispara recarga en el padre
 
   } catch (error) {
     console.error(' Error al subir imagen del profesor:', error)
-    alert('Error al subir imagen')
+    alert(t('teacherData.imageUploadError'))
   }
 }
 

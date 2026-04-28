@@ -1,19 +1,19 @@
 <template>
   <div class="container-fluid mt-5 pt-4">
-    <h1 class="mb-4 text-center">📊 Informes y Estadísticas</h1>
+    <h1 class="mb-4 text-center">{{ t('reports.reportsTitle') }}</h1>
 
     <!-- Filtro por Profesor (solo para administrador) -->
     <div v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'" class="row mb-4">
       <div class="col-md-6 mx-auto">
         <div class="card p-3">
-          <label for="selectProfesor" class="form-label">Filtrar por profesor:</label>
+          <label for="selectProfesor" class="form-label">{{ t('reports.filterByProfessor') }}</label>
           <select 
             id="selectProfesor"
             v-model="profesorSeleccionado" 
             class="form-select"
             @change="cargarEstadisticas"
           >
-            <option value="">-- Mostrar todos --</option>
+            <option value="">{{ t('reports.showAll') }}</option>
             <option v-for="profesor in profesores" :key="profesor.id" :value="profesor.id">
               {{ profesor.nombre }}
             </option>
@@ -24,32 +24,32 @@
 
     <!-- Información del profesor seleccionado -->
     <div v-if="profesorSeleccionado" class="alert alert-info mb-4">
-      <strong>Profesor seleccionado:</strong> {{ profesorNombreSeleccionado }}
+      <strong>{{ t('reports.selectedProfessor') }}</strong> {{ profesorNombreSeleccionado }}
     </div>
 
     <!-- Tarjetas de resumen -->
     <div class="row mb-4">
       <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 bg-primary text-white">
-          <h5>Total Eventos</h5>
+          <h5>{{ t('reports.totalEvents') }}</h5>
           <p class="fs-3 mb-0">{{ estadisticas.totalEventos }}</p>
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 bg-success text-white">
-          <h5>Horarios Consultados</h5>
+          <h5>{{ t('reports.schedulesConsulted') }}</h5>
           <p class="fs-3 mb-0">{{ estadisticas.horariosConsultados }}</p>
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 bg-warning text-dark">
-          <h5>Ausencias Registradas</h5>
+          <h5>{{ t('reports.absencesRegistered') }}</h5>
           <p class="fs-3 mb-0">{{ estadisticas.ausenciasRegistradas }}</p>
         </div>
       </div>
       <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 bg-info text-white">
-          <h5>Acciones Realizadas</h5>
+          <h5>{{ t('reports.actionsPerformed') }}</h5>
           <p class="fs-3 mb-0">{{ estadisticas.accionesRealizadas }}</p>
         </div>
       </div>
@@ -59,7 +59,7 @@
     <div class="row">
       <div class="col-md-6 mb-4">
         <div class="card shadow-sm p-4">
-          <h5 class="card-title">Eventos por Tipo</h5>
+          <h5 class="card-title">{{ t('reports.eventsByType') }}</h5>
           <div style="position: relative; height: 300px;">
             <canvas id="graficoEventos"></canvas>
           </div>
@@ -67,7 +67,7 @@
       </div>
       <div class="col-md-6 mb-4">
         <div class="card shadow-sm p-4">
-          <h5 class="card-title">Actividad por Día</h5>
+          <h5 class="card-title">{{ t('reports.activityByDay') }}</h5>
           <div style="position: relative; height: 300px;">
             <canvas id="graficoActividad"></canvas>
           </div>
@@ -79,15 +79,15 @@
     <div class="row mt-4">
       <div class="col-12">
         <div class="card shadow-sm p-4">
-          <h5 class="card-title">Últimos Eventos</h5>
+          <h5 class="card-title">{{ t('reports.latestEvents') }}</h5>
           <div class="table-responsive">
             <table class="table table-striped table-hover">
               <thead class="table-dark">
                 <tr>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
-                  <th>Fecha y Hora</th>
-                  <th>Detalles</th>
+                  <th>{{ t('reports.type') }}</th>
+                  <th>{{ t('reports.description') }}</th>
+                  <th>{{ t('reports.dateTime') }}</th>
+                  <th>{{ t('reports.details') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -104,7 +104,7 @@
               </tbody>
             </table>
             <p v-if="ultimosEventos.length === 0" class="text-muted text-center mt-3">
-              No hay eventos registrados
+              {{ t('reports.noEventsRecorded') }}
             </p>
           </div>
         </div>
@@ -118,8 +118,10 @@ import { onMounted, ref, computed, watch } from 'vue'
 import api from '../axios'
 import Chart from 'chart.js/auto'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from '../composables/useI18n'
 
 const auth = useAuthStore()
+const { t } = useI18n()
 const profesores = ref([])
 const profesorSeleccionado = ref('')
 const estadisticas = ref({
@@ -194,7 +196,7 @@ function actualizarGraficoEventos(datos) {
   }
 
   if (datos.length === 0) {
-    ctx.parentElement.innerHTML = '<p class="text-muted text-center">Sin datos disponibles</p>'
+  ctx.parentElement.innerHTML = `<p class="text-muted text-center">${t('reports.noDataAvailable')}</p>`
     return
   }
 
@@ -229,7 +231,7 @@ function actualizarGraficoActividad(datos) {
   }
 
   if (datos.length === 0) {
-    ctx.parentElement.innerHTML = '<p class="text-muted text-center">Sin datos disponibles</p>'
+  ctx.parentElement.innerHTML = `<p class="text-muted text-center">${t('reports.noDataAvailable')}</p>`
     return
   }
 
