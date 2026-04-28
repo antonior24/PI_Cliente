@@ -3,7 +3,7 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <!-- Título -->
-        <h1 class="mb-4 text-center">📤 Subir Archivo de Datos</h1>
+        <h1 class="mb-4 text-center">{{ t('uploadData.uploadTitle') }}</h1>
 
         <!-- Zona de drag and drop -->
         <div
@@ -19,8 +19,8 @@
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
-            <h3 class="mt-3">Arrastra tu archivo aquí</h3>
-            <p class="text-muted">o haz clic para seleccionar</p>
+            <h3 class="mt-3">{{ t('uploadData.dragFileHere') }}</h3>
+            <p class="text-muted">{{ t('uploadData.orClickToSelect') }}</p>
           </div>
           <input
             ref="fileInput"
@@ -33,16 +33,16 @@
 
         <!-- Información de archivos soportados -->
         <div class="mt-4 alert alert-info">
-          <strong>📋 Formatos soportados:</strong> .xlsx, .xls, .csv
+          <strong>{{ t('uploadData.supportedFormats') }}</strong> .xlsx, .xls, .csv
         </div>
 
         <!-- Previsualización del archivo seleccionado -->
         <div v-if="selectedFile" class="card mt-4">
           <div class="card-body">
-            <h5 class="card-title">Archivo seleccionado</h5>
+            <h5 class="card-title">{{ t('uploadData.selectedFile') }}</h5>
             <div class="file-info">
-              <p><strong>Nombre:</strong> {{ selectedFile.name }}</p>
-              <p><strong>Tamaño:</strong> {{ formatFileSize(selectedFile.size) }}</p>
+              <p><strong>{{ t('uploadData.name') }}</strong> {{ selectedFile.name }}</p>
+              <p><strong>{{ t('uploadData.size') }}</strong> {{ formatFileSize(selectedFile.size) }}</p>
             </div>
 
             <!-- Barra de progreso -->
@@ -58,10 +58,10 @@
             <!-- Botones de acción -->
             <div v-if="!isUploading" class="mt-4 d-flex gap-2">
               <button class="btn btn-primary" @click="uploadFile">
-                ✓ Subir archivo
+                {{ t('uploadData.uploadFile') }}
               </button>
               <button class="btn btn-secondary" @click="clearFile">
-                ✕ Cancelar
+                {{ t('uploadData.cancel') }}
               </button>
             </div>
           </div>
@@ -86,9 +86,11 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import ModalMensaje from '../components/ModalMensaje.vue'
+import { useI18n } from '../composables/useI18n'
 
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const fileInput = ref(null)
 const isDragOver = ref(false)
@@ -145,7 +147,7 @@ function formatFileSize(bytes) {
 
 async function uploadFile() {
   if (!selectedFile.value) {
-    mostrarModal('Error', 'Por favor selecciona un archivo', 'error')
+    mostrarModal('Error', t('uploadData.pleaseSelectFile'), 'error')
     return
   }
 
@@ -195,7 +197,7 @@ async function uploadFile() {
     reader.readAsDataURL(selectedFile.value)
   } catch (error) {
     console.error('Error al procesar el archivo:', error)
-    mostrarModal('Error', 'Error al procesar el archivo', 'error')
+    mostrarModal('Error', t('uploadData.processingError'), 'error')
     isUploading.value = false
   }
 }

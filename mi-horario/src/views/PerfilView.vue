@@ -13,7 +13,7 @@
 
       <!-- Subir imagen -->
       <label for="inputFotoPerfil" class="btn btn-outline-secondary mb-3" style="cursor: pointer;">
-        Subir nueva foto de perfil
+        {{ t('profile.uploadNewProfilePhoto') }}
       </label>
       <input
         id="inputFotoPerfil"
@@ -25,12 +25,12 @@
 
       <!-- Cambiar contraseña -->
       <div v-if="errorPassword" class="text-danger mb-2">{{ errorPassword }}</div>
-      <input v-model="nuevaPassword" type="password" class="form-control mb-2" placeholder="Nueva contraseña" />
-      <input v-model="confirmacionPassword" type="password" class="form-control mb-3" placeholder="Confirmar contraseña" />
-      <button class="btn btn-primary w-100 mb-3" @click="cambiarPassword">Cambiar contraseña</button>
+      <input v-model="nuevaPassword" type="password" class="form-control mb-2" :placeholder="t('profile.newPassword')" />
+      <input v-model="confirmacionPassword" type="password" class="form-control mb-3" :placeholder="t('profile.confirmPassword')" />
+      <button class="btn btn-primary w-100 mb-3" @click="cambiarPassword">{{ t('profile.changePassword') }}</button>
 
       <!-- Logout -->
-      <button class="btn btn-outline-danger w-100" @click="logout">Cerrar sesión</button>
+      <button class="btn btn-outline-danger w-100" @click="logout">{{ t('profile.logout') }}</button>
     </div>
   </div>
 </template>
@@ -39,10 +39,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from '../composables/useI18n'
 import axios from 'axios'
 
 const router = useRouter()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const imagenPerfil = ref(null)
 const imagenPorDefecto = 'https://img.freepik.com/vector-premium/icono-usuario-avatar-perfil-usuario-icono-persona-imagen-perfil-silueta-neutral-genero-adecuado_697711-1132.jpg'
@@ -72,11 +74,11 @@ function subirImagen(event) {
       }
     }
   ).then(() => {
-    alert('Imagen subida con éxito')
+    alert(t('profile.imageUploadSuccess'))
     cargarImagenConToken()
   }).catch(err => {
     console.error(err)
-    alert('Error al subir la imagen')
+    alert(t('profile.imageUploadError'))
   })
 }
 
@@ -99,7 +101,7 @@ async function cargarImagenConToken() {
     )
     imagenPerfil.value = `data:${tipo};base64,${base64}`
   } catch (error) {
-    console.warn('No se encontró imagen. Usando imagen por defecto.')
+    console.warn(t('profile.noImageFound'))
     imagenPerfil.value = imagenPorDefecto
   }
 }
@@ -108,12 +110,12 @@ async function cambiarPassword() {
   errorPassword.value = ''
 
   if (!nuevaPassword.value || nuevaPassword.value.length < 6) {
-    errorPassword.value = 'La contraseña debe tener al menos 6 caracteres'
+    errorPassword.value = t('profile.passwordMinLength')
     return
   }
 
   if (nuevaPassword.value !== confirmacionPassword.value) {
-    errorPassword.value = 'Las contraseñas no coinciden'
+    errorPassword.value = t('profile.passwordsDoNotMatch')
     return
   }
 
@@ -129,11 +131,11 @@ async function cambiarPassword() {
     auth.usuario.cambiarContraseña = false
     localStorage.setItem('usuario', JSON.stringify(auth.usuario))
 
-    alert('Contraseña cambiada correctamente')
+    alert(t('profile.passwordChangeSuccess'))
     nuevaPassword.value = ''
     confirmacionPassword.value = ''
   } catch (err) {
-    errorPassword.value = 'Error al cambiar la contraseña'
+    errorPassword.value = t('profile.passwordChangeError')
     console.error(err)
   }
 }

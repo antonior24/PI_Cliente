@@ -8,7 +8,7 @@
         v-model="valorBusqueda"
         @input="emitirBusqueda"
         type="text"
-        placeholder="Buscar profesor..."
+        :placeholder="t('teacherData.searchTeacherPlaceholder')"
         class="form-control border-0 shadow-none bg-light text-dark"
       />
     </div>
@@ -17,8 +17,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from '../composables/useI18n'
 
 const valorBusqueda = ref('')
+const { t } = useI18n()
 
 const emit = defineEmits(['buscar'])
 

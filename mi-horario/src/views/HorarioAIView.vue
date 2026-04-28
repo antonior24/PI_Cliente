@@ -1,14 +1,14 @@
 <template>
   <div class="container mt-5">
     <br>
-    <h2>Consultas de IA sobre mi horario</h2>
+    <h2>{{ t('aiSchedule.aiQueriesAboutSchedule') }}</h2>
     <div class="mb-3">
-      <textarea v-model="pregunta" class="form-control" rows="4" placeholder="Escribe tu pregunta aquí"></textarea>
+      <textarea v-model="pregunta" class="form-control" rows="4" :placeholder="t('aiSchedule.writeYourQuestion')"></textarea>
     </div>
-    <button class="btn btn-primary" @click="consultar">Enviar</button>
+    <button class="btn btn-primary" @click="consultar">{{ t('aiSchedule.send') }}</button>
 
     <div v-if="respuesta" class="mt-4">
-      <h4>Respuesta</h4>
+      <h4>{{ t('aiSchedule.response') }}</h4>
       <p>{{ respuesta }}</p>
     </div>
   </div>
@@ -18,10 +18,12 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from '../composables/useI18n'
 
 const pregunta = ref('')
 const respuesta = ref('')
 const auth = useAuthStore()
+const { t } = useI18n()
 
 async function consultar() {
   respuesta.value = ''

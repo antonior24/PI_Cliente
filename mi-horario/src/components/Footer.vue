@@ -9,13 +9,15 @@
         </div>
       </div>
       <div>
-        <small>&copy; {{ new Date().getFullYear() }} - Todos los derechos reservados</small>
+        <small>&copy; {{ new Date().getFullYear() }} - {{ t('footer.allRightsReserved') }}</small>
       </div>
     </div>
   </footer>
 </template>
 
 <script setup>
+import { useI18n } from '../composables/useI18n'
+const { t } = useI18n()
 const logoSrc = new URL('../assets/logo_iespsur.jpeg', import.meta.url).href
 </script>
 

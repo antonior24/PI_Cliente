@@ -43,6 +43,7 @@ import { useRouter } from 'vue-router'
 
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
+import { useI18n } from '../composables/useI18n'
 
 const busqueda = ref('')
 const resultados = ref([])
@@ -52,6 +53,7 @@ const isLoading = ref(false)
 const erroresFormulario = ref({})
 const action = ref('')  // Asegúrate de que action sea un ref
 const router = useRouter()
+const { t } = useI18n()
 
 
 
@@ -156,8 +158,8 @@ function cancelarFormulario() {
 async function guardarUsuario(datosFormulario) {
   const { idProfesor, email, password, rol, nombre } = datosFormulario;
 
-  if (!email || !password || !rol || !nombre) {
-    mostrarModal(' Campos incompletos', 'Por favor, completa todos los campos.', 'warning');
+    if (!email || !password || !rol || !nombre) {
+    mostrarModal(t('modal.importErrorTitle'), t('teacherData.incompleteFields'), 'warning');
     return;
   }
 
@@ -186,7 +188,7 @@ async function guardarUsuario(datosFormulario) {
     );
 
     console.log("Respuesta del servidor:", response);
-    mostrarModal(' Usuario creado', `Se ha vinculado correctamente a ${nombre}`, 'success');
+    mostrarModal(t('teacherData.userCreated'), `${t('teacherData.userLinked')} ${nombre}`, 'success');
     profesorSeleccionado.value = null;
     obtenerTodosLosProfesores();
 
@@ -200,11 +202,11 @@ async function guardarUsuario(datosFormulario) {
         erroresFormulario.value = error.response.data; // Mostrar solo errores de validación
       } else {
         // Si es otro tipo de error, mostrar el modal de error
-        mostrarModal(' Error', 'Ese usuario ya existe.', 'error');
+        mostrarModal(t('modal.importErrorTitle'), t('teacherData.errorUserExists'), 'error');
       }
     } else {
       console.error("Error desconocido:", error);
-      mostrarModal(' Error', 'Ocurrió un error inesperado.', 'error');
+      mostrarModal(t('modal.importErrorTitle'), t('teacherData.unexpectedError'), 'error');
     }
   } finally {
     isLoading.value = false;
@@ -225,11 +227,11 @@ async function eliminarUsuario(profesor) {
       }
     })
 
-    mostrarModal(' Usuario eliminado', `El usuario de ${profesor.nombre} ha sido eliminado.`, 'success')
+    mostrarModal(t('teacherData.userDeleted'), t('teacherData.userDeletedMessage'), 'success')
     obtenerTodosLosProfesores()
   } catch (error) {
     console.error('Error al eliminar usuario:', error)
-    mostrarModal(' Error', 'No se pudo eliminar el usuario.', 'error')
+    mostrarModal(t('modal.importErrorTitle'), t('teacherData.errorDeletingUser'), 'error')
   }
 }
 
@@ -287,11 +289,11 @@ async function modificarUsuario(datosFormulario) {
 
       } else {
         // Si es otro tipo de error
-        mostrarModal(' Error', 'El usuario ya existe o hay otro error.', 'error');
+          mostrarModal(t('modal.importErrorTitle'), t('teacherData.errorUserExists'), 'error');
       }
     } else {
       console.error("Error desconocido:", error);
-      mostrarModal(' Error', 'Ocurrió un error inesperado.', 'error');
+        mostrarModal(t('modal.importErrorTitle'), t('teacherData.unexpectedError'), 'error');
     }
 
   } finally {
@@ -304,7 +306,7 @@ async function modificarUsuario(datosFormulario) {
 function irADetallesUsuario(idProfesor) {
   const id = Number(idProfesor)
   if (!Number.isFinite(id) || id <= 0) {
-    mostrarModal('Error', 'No se pudo identificar el profesor seleccionado.', 'error')
+    mostrarModal(t('modal.importErrorTitle'), t('teacherData.errorIdentifyingProfessor'), 'error')
     return
   }
 

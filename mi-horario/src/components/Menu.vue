@@ -103,19 +103,11 @@
             </select>
           </li>
 
-          <!-- DROPDOWN PARA PROFESOR (solo si es profesor) -->
-          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="profesorDropdown" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              {{ t('menu.myAccount') }}
+          <!-- Descargar Horario PDF (solo si es profesor) -->
+          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="descargarHorarioPDF">
+              {{ t('menu.downloadSchedulePdf') }}
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profesorDropdown">
-              <li>
-                <a class="dropdown-item" href="#" @click.prevent="descargarHorarioPDF">
-                  {{ t('menu.downloadSchedulePdf') }}
-                </a>
-              </li>
-            </ul>
           </li>
 
           <!-- DROPDOWN DE PERFIL -->
@@ -169,19 +161,19 @@
   <!-- Modal cambio de contraseña -->
   <div v-if="mostrarModalPassword" class="modal-overlay">
     <div class="modal-content modal-warning">
-      <h5 class="mb-3">🔐 Cambiar Contraseña</h5>
+      <h5 class="mb-3"> {{ t('modal.changePassword') }}</h5>
 
       <div v-if="errorPassword" class="text-danger mb-2 text-start" style="font-size: 0.9rem;">
         {{ errorPassword }}
       </div>
 
-      <input v-model="nuevaPassword" type="password" class="form-control mb-3" placeholder="Nueva contraseña" />
+      <input v-model="nuevaPassword" type="password" class="form-control mb-3" :placeholder="t('modal.newPassword')" />
       <input v-model="confirmacionPassword" type="password" class="form-control mb-3"
-        placeholder="Confirmar contraseña" />
+        :placeholder="t('modal.confirmPassword')" />
 
       <div class="d-flex justify-content-between">
-        <button class="btn btn-secondary" @click="mostrarModalPassword = false">Cancelar</button>
-        <button class="btn btn-primary" @click="cambiarPassword">Guardar</button>
+        <button class="btn btn-secondary" @click="mostrarModalPassword = false">{{ t('modal.cancel') }}</button>
+        <button class="btn btn-primary" @click="cambiarPassword">{{ t('modal.save') }}</button>
       </div>
     </div>
   </div>
@@ -255,12 +247,12 @@ function subirImagen(event) {
     console.log(' Respuesta del backend (imagen subida):', response)
     console.log('📨 response.data:', response.data)
 
-    mostrarModal('Imagen subida', response.data, 'success')
+    mostrarModal(t('modal.imageUploadedSuccess'), response.data, 'success')
     cargarImagenConToken()
   }).catch(err => {
     console.error('Error al subir imagen:', err)
-    const mensaje = err.response?.data || 'Error al subir la imagen'
-    mostrarModal('Error', mensaje, 'error')
+    const mensaje = err.response?.data || t('modal.imageUploadError')
+    mostrarModal(t('modal.imageUploadError'), mensaje, 'error')
   })
 }
 
@@ -287,7 +279,7 @@ async function cargarImagenConToken() {
     )
     imagenPerfil.value = `data:${tipo};base64,${base64}`
   } catch (error) {
-    console.warn('No se encontró imagen. Usando imagen por defecto.')
+    console.warn(t('modal.noImageFound'))
     imagenPerfil.value = imagenPorDefecto
   }
 }
@@ -301,12 +293,12 @@ async function cambiarPassword() {
   errorPassword.value = ''
 
   if (!nuevaPassword.value || nuevaPassword.value.length < 6) {
-    errorPassword.value = 'La contraseña debe tener al menos 6 caracteres'
+    errorPassword.value = t('modal.passwordMinLength')
     return
   }
 
   if (nuevaPassword.value !== confirmacionPassword.value) {
-    errorPassword.value = 'Las contraseñas no coinciden'
+    errorPassword.value = t('modal.passwordsDoNotMatch')
     return
   }
 
@@ -325,15 +317,15 @@ async function cambiarPassword() {
     auth.usuario.cambiarContraseña = false
     localStorage.setItem('usuario', JSON.stringify(auth.usuario))
 
-    mostrarModal('Contraseña Modificada', 'Contraseña cambiada correctamente', 'success')
+    mostrarModal(t('modal.passwordChangedSuccess'), t('modal.passwordChangedMessage'), 'success')
     mostrarModalPassword.value = false
     nuevaPassword.value = ''
     confirmacionPassword.value = ''
   } catch (err) {
-    const mensaje = err.response?.data?.mensaje || 'Error al cambiar la contraseña'
+    const mensaje = err.response?.data?.mensaje || t('modal.passwordChangeError')
     errorPassword.value = mensaje
     console.error('Error al cambiar contraseña:', err)
-    mostrarModal('Error', mensaje, 'error')
+    mostrarModal(t('modal.passwordChangeError'), mensaje, 'error')
   }
 }
 
@@ -365,10 +357,10 @@ async function generarParteDiario() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
 
-    mostrarModal('Éxito', 'Parte diario generado correctamente.', 'success')
+    mostrarModal(t('modal.dailyReportSuccess'), t('modal.dailyReportSuccessMessage'), 'success')
   } catch (error) {
     console.error('Error al generar el parte diario:', error)
-    mostrarModal('Error', 'No se pudo generar el parte diario.', 'error')
+    mostrarModal(t('modal.dailyReportError'), t('modal.dailyReportErrorMessage'), 'error')
   } finally {
     cargando.value = false
   }
@@ -405,10 +397,10 @@ async function descargarHorarioPDF() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
 
-    mostrarModal('Éxito', 'Horario descargado correctamente.', 'success')
+    mostrarModal(t('modal.scheduleDownloadSuccess'), t('modal.scheduleDownloadedMessage'), 'success')
   } catch (error) {
     console.error('Error al descargar el horario PDF:', error)
-    let mensaje = 'No se pudo descargar el horario en PDF.'
+    let mensaje = t('modal.scheduleDownloadErrorMessage')
     if (error?.response?.data instanceof Blob) {
       try {
         const texto = await error.response.data.text()
@@ -420,7 +412,7 @@ async function descargarHorarioPDF() {
     } else if (error?.response?.status) {
       mensaje = `Error ${error.response.status}`
     }
-    mostrarModal('Error', mensaje, 'error')
+    mostrarModal(t('modal.scheduleDownloadError'), mensaje, 'error')
   } finally {
     cargando.value = false
   }
