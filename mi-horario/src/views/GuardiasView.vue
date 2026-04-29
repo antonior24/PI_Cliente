@@ -156,6 +156,7 @@
                     </td>
                     <td>
                       <button 
+                        v-if="esAdmin || guardia.idProfesor == idProfesorLogueado"
                         @click="eliminarGuardia(guardia.id)"
                         class="btn btn-sm btn-danger"
                         :disabled="cargando"
@@ -164,6 +165,7 @@
                         🗑️
                       </button>
                     </td>
+
                   </tr>
                 </tbody>
               </table>
@@ -179,8 +181,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useI18n } from '../composables/useI18n'
+import { useAuthStore } from '../stores/auth'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
+const esAdmin = computed(() => authStore.usuario?.rol === 'administrador')
+const idProfesorLogueado = ref(null)
+
 
 const formularioGuardia = ref({
   fecha: '',
@@ -295,7 +302,11 @@ async function cargarGuardias() {
     })
 
     guardiasRegistradas.value = response.data
+    if (response.data.length > 0 && !idProfesorLogueado.value) {
+      idProfesorLogueado.value = response.data[0].idProfesor
+    }
     puntosTotales.value = guardiasRegistradas.value.reduce((sum, g) => sum + (g.puntos || 0), 0)
+
   } catch (error) {
     console.error('Error al cargar guardias:', error)
   }
@@ -384,9 +395,16 @@ async function eliminarGuardia(idGuardia) {
       mensaje.value = { tipo: '', texto: '' }
     }, 2000)
   } catch (error) {
-    mensaje.value = { tipo: 'error', texto: 'Error al eliminar la guardia' }
+    let mensajeError = 'Error al eliminar la guardia'
+    if (error.response?.status === 403) {
+      mensajeError = 'No tienes permisos para eliminar esta guardia'
+    } else if (error.response?.status === 404) {
+      mensajeError = 'Guardia no encontrada'
+    }
+    mensaje.value = { tipo: 'error', texto: mensajeError }
     console.error('Error:', error)
   } finally {
+
     cargando.value = false
   }
 }
