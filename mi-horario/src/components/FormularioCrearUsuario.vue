@@ -21,12 +21,31 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Rol</label>
-      <select class="form-select" v-model="form.rol">
-        <option disabled value="">Selecciona un rol</option>
-        <option value="profesor">Profesor</option>
-        <option value="administrador">Equipo directivo</option>
-      </select>
+      <label class="form-label">Roles (selecciona uno o más)</label>
+      <div class="form-check">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          v-model="form.rolesSeleccionados" 
+          value="profesor"
+          id="rolProfesor"
+        >
+        <label class="form-check-label" for="rolProfesor">
+          Profesor
+        </label>
+      </div>
+      <div class="form-check">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          v-model="form.rolesSeleccionados" 
+          value="administrador"
+          id="rolAdmin"
+        >
+        <label class="form-check-label" for="rolAdmin">
+          Equipo directivo / Admin
+        </label>
+      </div>
       <div class="text-danger" v-if="errores.rol">{{ errores.rol }}</div>
     </div>
 
@@ -53,17 +72,20 @@ const emit = defineEmits('guardar')
 const form = reactive({
   email: '',
   password: '',
-  rol: ''
+  rolesSeleccionados: []
 })
 
 function guardar() {
+  // Convertir los roles seleccionados a string separado por comas
+  const rolesString = form.rolesSeleccionados.join(',')
+  
   // Emitir los datos hacia el componente padre
   emit('guardar', {
     idProfesor: props.profesor.idProfesor,
     nombre: props.profesor.nombre,
     email: form.email,
     password: form.password,
-    rol: form.rol
+    rol: rolesString
   })
 }
 

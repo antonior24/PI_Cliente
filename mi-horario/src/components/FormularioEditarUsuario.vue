@@ -20,12 +20,31 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Rol</label>
-      <select class="form-select" v-model="form.rol">
-        <option disabled value="">Selecciona un rol</option>
-        <option value="profesor">Profesor</option>
-        <option value="administrador">Equipo directivo</option>
-      </select>
+      <label class="form-label">Roles (selecciona uno o más)</label>
+      <div class="form-check">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          v-model="form.rolesSeleccionados" 
+          value="profesor"
+          id="editarRolProfesor"
+        >
+        <label class="form-check-label" for="editarRolProfesor">
+          Profesor
+        </label>
+      </div>
+      <div class="form-check">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          v-model="form.rolesSeleccionados" 
+          value="administrador"
+          id="editarRolAdmin"
+        >
+        <label class="form-check-label" for="editarRolAdmin">
+          Equipo directivo / Admin
+        </label>
+      </div>
       <div class="text-danger" v-if="errores.rol">{{ errores.rol }}</div>
     </div>
 
@@ -54,23 +73,28 @@ const props = defineProps({
 const form = reactive({
   email: props.profesor.usuario.email ,
   password: '',  // La contrasena puede ser opcional
-  rol: props.profesor.usuario.rol
+  rolesSeleccionados: []
 })
 
 // Usar un watcher para actualizar el formulario cada vez que cambie el profesor
 watch(() => props.profesor, (nuevoProfesor) => {
   form.email = nuevoProfesor?.usuario?.email || '';  // Actualiza el email con los nuevos valores
   form.password = '';  // Puedes limpiar la contrasena si es necesario
-  form.rol = nuevoProfesor?.usuario?.rol || '';  // Actualiza el rol
+  // Convertir el string de roles (separados por comas) en un array para los checkboxes
+  const rolesString = nuevoProfesor?.usuario?.rol || '';
+  form.rolesSeleccionados = rolesString ? rolesString.split(',').map(r => r.trim()) : [];
 }, { immediate: true });  // Con 'immediate: true', se ejecutará también en la inicialización
 
 // Función para emitir el evento
 function enviar() {
+  // Convertir los roles seleccionados a string separado por comas
+  const rolesString = form.rolesSeleccionados.join(',')
+  
   emit('actualizar', {
     idUsuario: props.profesor.usuario.id, // Usar el ID del profesor (usuario)
     nombre: props.profesor.nombre,          // Pasar el nombre del profesor (no del formulario)
     email: form.email,                      // Pasar el email desde el formulario
-    rol: form.rol,                          // Pasar el rol desde el formulario
+    rol: rolesString,                       // Pasar los roles como string separado por comas
     password: form.password || "",         // Si no hay contrasena, enviar una cadena vacia
   });
 }

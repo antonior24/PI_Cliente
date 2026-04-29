@@ -31,7 +31,8 @@ const { t } = useI18n()
 
 const esProfesor = computed(() => {
   const rol = auth.usuario?.rol
-  return Boolean(rol && String(rol).toLowerCase() === 'profesor')
+  // Verifica si tiene el rol de profesor (puede ser "profesor" o "profesor,administrador" o "administrador,profesor")
+  return Boolean(rol && String(rol).toLowerCase().includes('profesor'))
 })
 
 onMounted(() => {
