@@ -104,7 +104,7 @@
           </li>
 
           <!-- Descargar Horario PDF (solo si es profesor) -->
-          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item">
+          <li v-if="auth.usuario?.rol && String(auth.usuario.rol).toLowerCase().includes('profesor')" class="nav-item">
             <a class="nav-link" href="#" @click.prevent="descargarHorarioPDF">
               {{ t('menu.downloadSchedulePdf') }}
             </a>

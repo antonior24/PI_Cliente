@@ -44,7 +44,7 @@
 
       </div>
 
-      <div v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'">
+      <div v-if="auth.usuario?.rol && String(auth.usuario.rol).toLowerCase().includes('profesor')">
         <router-link to="/mis-horario" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
           {{ t('modal.sidemenuMySchedules') }}
         </router-link>
