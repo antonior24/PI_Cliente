@@ -8,10 +8,10 @@
         <img :src="logo" alt="Logo" height="36" class="me-2" />
 
         <!-- Título completo en escritorio -->
-        <span class="d-none d-lg-inline titulo-app">Horario IES Polígono Sur</span>
+        <span class="d-none d-lg-inline titulo-app">{{ t('app.fullTitle') }}</span>
 
         <!-- Título reducido en móvil -->
-        <span class="d-inline d-lg-none titulo-app">Polígono Sur</span>
+        <span class="d-inline d-lg-none titulo-app">{{ t('app.shortTitle') }}</span>
       </router-link>
 
 
@@ -40,45 +40,45 @@
 
           <!-- Inicio -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/home">Inicio</router-link>
+            <router-link class="nav-link" to="/home">{{ t('menu.home') }}</router-link>
           </li>
 
           <!-- Mis Ausencias -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/mis-ausencias">Ausencias</router-link>
+            <router-link class="nav-link" to="/mis-ausencias">{{ t('menu.absences') }}</router-link>
           </li>
 
           <!-- Guardias -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/guardias">Guardias</router-link>
+            <router-link class="nav-link" to="/guardias">{{ t('menu.guards') }}</router-link>
           </li>
 
           <!-- DROPDOWN PARA ADMINISTRADOR -->
           <li v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
-              Administración
+              {{ t('menu.administration') }}
             </a>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
               <li>
                 <router-link class="dropdown-item" to="/datos-profesorado">
-                  Datos profesorado
+                  {{ t('menu.teacherData') }}
                 </router-link>
               </li>
               <li>
                 <router-link class="dropdown-item" to="/subir-archivo">
-                  Subir archivo de datos
+                  {{ t('menu.uploadData') }}
                 </router-link>
               </li>
               <li>
                 <router-link class="dropdown-item" to="/informes">
-                  Informes
+                  {{ t('menu.reports') }}
                 </router-link>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="#" @click.prevent="generarParteDiario">
-                  Generar partes diario
+                  {{ t('menu.dailyReports') }}
                 </a>
               </li>
             </ul>
@@ -91,27 +91,23 @@
 
           <!-- Horario IA -->
           <li class="nav-item">
-            <router-link class="nav-link" to="/horario/ia">Horario IA</router-link>
+            <router-link class="nav-link" to="/horario/ia">{{ t('menu.aiSchedule') }}</router-link>
           </li>
 
-          <!-- DROPDOWN PARA PROFESOR (solo si es profesor) -->
-          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="profesorDropdown" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              Mi cuenta
+          <li class="nav-item d-flex align-items-center ms-2">
+            <label class="text-white small me-2 d-none d-xl-inline">{{ t('menu.language') }}</label>
+            <select class="form-select form-select-sm bg-dark text-white border-secondary" :value="locale"
+              @change="setLocale($event.target.value)" aria-label="Seleccion de idioma" style="width: 90px;">
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
+          </li>
+
+          <!-- Descargar Horario PDF (solo si es profesor) -->
+          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item">
+            <a class="nav-link" href="#" @click.prevent="descargarHorarioPDF">
+              {{ t('menu.downloadSchedulePdf') }}
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profesorDropdown">
-              <li>
-                <router-link class="dropdown-item" to="/mis-horario">
-                  Mis horarios
-                </router-link>
-              </li>
-              <li>
-                <a class="dropdown-item" href="#" @click.prevent="descargarHorarioPDF">
-                  Descargar horario (PDF)
-                </a>
-              </li>
-            </ul>
           </li>
 
           <!-- DROPDOWN DE PERFIL -->
@@ -132,18 +128,18 @@
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
               <li>
                 <router-link class="dropdown-item" to="/perfil">
-                  Mi perfil
+                  {{ t('menu.myProfile') }}
                 </router-link>
               </li>
               <li>
                 <label for="inputFotoPerfil" class="dropdown-item" style="cursor: pointer;">
-                  Subir foto de Perfil
+                  {{ t('menu.uploadProfileImage') }}
                 </label>
                 <input id="inputFotoPerfil" type="file" accept="image/*" @change="subirImagen" style="display: none;" />
               </li>
               <li>
                 <a class="dropdown-item" href="#" @click.prevent="mostrarModalPassword = true">
-                  Cambiar contraseña
+                  {{ t('menu.changePassword') }}
                 </a>
               </li>
               <li>
@@ -151,7 +147,7 @@
               </li>
               <li>
                 <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
-                  Cerrar sesión
+                  {{ t('menu.logout') }}
                 </a>
               </li>
             </ul>
@@ -165,19 +161,19 @@
   <!-- Modal cambio de contraseña -->
   <div v-if="mostrarModalPassword" class="modal-overlay">
     <div class="modal-content modal-warning">
-      <h5 class="mb-3">🔐 Cambiar Contraseña</h5>
+      <h5 class="mb-3"> {{ t('modal.changePassword') }}</h5>
 
       <div v-if="errorPassword" class="text-danger mb-2 text-start" style="font-size: 0.9rem;">
         {{ errorPassword }}
       </div>
 
-      <input v-model="nuevaPassword" type="password" class="form-control mb-3" placeholder="Nueva contraseña" />
+      <input v-model="nuevaPassword" type="password" class="form-control mb-3" :placeholder="t('modal.newPassword')" />
       <input v-model="confirmacionPassword" type="password" class="form-control mb-3"
-        placeholder="Confirmar contraseña" />
+        :placeholder="t('modal.confirmPassword')" />
 
       <div class="d-flex justify-content-between">
-        <button class="btn btn-secondary" @click="mostrarModalPassword = false">Cancelar</button>
-        <button class="btn btn-primary" @click="cambiarPassword">Guardar</button>
+        <button class="btn btn-secondary" @click="mostrarModalPassword = false">{{ t('modal.cancel') }}</button>
+        <button class="btn btn-primary" @click="cambiarPassword">{{ t('modal.save') }}</button>
       </div>
     </div>
   </div>
@@ -192,15 +188,18 @@
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import api from '../axios'
 import logo from '../assets/logo_iespsur.jpeg'
 import { ref, onMounted } from 'vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
+import { useI18n } from '../composables/useI18n'
 
 const imagenPerfil = ref(null)
 const cargando = ref(false)
 
 const router = useRouter()
 const auth = useAuthStore()
+const { locale, setLocale, t } = useI18n()
 
 // 👇 Modal de mensajes
 const modalVisible = ref(false)
@@ -248,12 +247,12 @@ function subirImagen(event) {
     console.log(' Respuesta del backend (imagen subida):', response)
     console.log('📨 response.data:', response.data)
 
-    mostrarModal('Imagen subida', response.data, 'success')
+    mostrarModal(t('modal.imageUploadedSuccess'), response.data, 'success')
     cargarImagenConToken()
   }).catch(err => {
     console.error('Error al subir imagen:', err)
-    const mensaje = err.response?.data || 'Error al subir la imagen'
-    mostrarModal('Error', mensaje, 'error')
+    const mensaje = err.response?.data || t('modal.imageUploadError')
+    mostrarModal(t('modal.imageUploadError'), mensaje, 'error')
   })
 }
 
@@ -280,7 +279,7 @@ async function cargarImagenConToken() {
     )
     imagenPerfil.value = `data:${tipo};base64,${base64}`
   } catch (error) {
-    console.warn('No se encontró imagen. Usando imagen por defecto.')
+    console.warn(t('modal.noImageFound'))
     imagenPerfil.value = imagenPorDefecto
   }
 }
@@ -294,12 +293,12 @@ async function cambiarPassword() {
   errorPassword.value = ''
 
   if (!nuevaPassword.value || nuevaPassword.value.length < 6) {
-    errorPassword.value = 'La contraseña debe tener al menos 6 caracteres'
+    errorPassword.value = t('modal.passwordMinLength')
     return
   }
 
   if (nuevaPassword.value !== confirmacionPassword.value) {
-    errorPassword.value = 'Las contraseñas no coinciden'
+    errorPassword.value = t('modal.passwordsDoNotMatch')
     return
   }
 
@@ -318,26 +317,22 @@ async function cambiarPassword() {
     auth.usuario.cambiarContraseña = false
     localStorage.setItem('usuario', JSON.stringify(auth.usuario))
 
-    mostrarModal('Contraseña Modificada', 'Contraseña cambiada correctamente', 'success')
+    mostrarModal(t('modal.passwordChangedSuccess'), t('modal.passwordChangedMessage'), 'success')
     mostrarModalPassword.value = false
     nuevaPassword.value = ''
     confirmacionPassword.value = ''
   } catch (err) {
-    const mensaje = err.response?.data?.mensaje || 'Error al cambiar la contraseña'
+    const mensaje = err.response?.data?.mensaje || t('modal.passwordChangeError')
     errorPassword.value = mensaje
     console.error('Error al cambiar contraseña:', err)
-    mostrarModal('Error', mensaje, 'error')
+    mostrarModal(t('modal.passwordChangeError'), mensaje, 'error')
   }
 }
 
 async function generarParteDiario() {
   cargando.value = true
   try {
-    const response = await axios.get('http://localhost:8081/api/parte-ausencias', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    const response = await api.get('/parte-ausencias')
 
     const base64PDF = response.data
     const byteCharacters = atob(base64PDF)
@@ -362,10 +357,10 @@ async function generarParteDiario() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
 
-    mostrarModal('Éxito', 'Parte diario generado correctamente.', 'success')
+    mostrarModal(t('modal.dailyReportSuccess'), t('modal.dailyReportSuccessMessage'), 'success')
   } catch (error) {
     console.error('Error al generar el parte diario:', error)
-    mostrarModal('Error', 'No se pudo generar el parte diario.', 'error')
+    mostrarModal(t('modal.dailyReportError'), t('modal.dailyReportErrorMessage'), 'error')
   } finally {
     cargando.value = false
   }
@@ -374,10 +369,7 @@ async function generarParteDiario() {
 async function descargarHorarioPDF() {
   cargando.value = true
   try {
-    const response = await axios.get('http://localhost:8081/api/horarios/pdf/mis-horarios', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
+    const response = await api.get('/horarios/pdf/mis-horarios', {
       responseType: 'blob'
     })
 
@@ -405,10 +397,22 @@ async function descargarHorarioPDF() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
 
-    mostrarModal('Éxito', 'Horario descargado correctamente.', 'success')
+    mostrarModal(t('modal.scheduleDownloadSuccess'), t('modal.scheduleDownloadedMessage'), 'success')
   } catch (error) {
     console.error('Error al descargar el horario PDF:', error)
-    mostrarModal('Error', 'No se pudo descargar el horario en PDF.', 'error')
+    let mensaje = t('modal.scheduleDownloadErrorMessage')
+    if (error?.response?.data instanceof Blob) {
+      try {
+        const texto = await error.response.data.text()
+        const json = JSON.parse(texto)
+        mensaje = json?.error || json?.message || mensaje
+      } catch (e) {
+        mensaje = `Error ${error.response?.status || ''}`.trim() || mensaje
+      }
+    } else if (error?.response?.status) {
+      mensaje = `Error ${error.response.status}`
+    }
+    mostrarModal(t('modal.scheduleDownloadError'), mensaje, 'error')
   } finally {
     cargando.value = false
   }

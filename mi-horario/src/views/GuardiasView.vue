@@ -5,13 +5,13 @@
       <div class="col-lg-8">
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">📋 Registrar Guardia</h5>
+            <h5 class="mb-0">{{ t('views.registerGuard') }}</h5>
           </div>
           <div class="card-body">
             <form @submit.prevent="registrarGuardia">
               <div class="row gy-3">
                 <div class="col-md-6">
-                  <label for="fecha" class="form-label">Fecha</label>
+                  <label for="fecha" class="form-label">{{ t('views.date') }}</label>
                   <input 
                     type="date" 
                     id="fecha"
@@ -22,9 +22,9 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label for="horarioCobertura" class="form-label">Clase a Cubrir</label>
+                  <label for="horarioCobertura" class="form-label">{{ t('views.coverageClass') }}</label>
                   <div v-if="cargandoHorarios" class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Cargando...</span>
+                    <span class="visually-hidden">{{ t('views.loading') }}</span>
                   </div>
                   <select 
                     v-else
@@ -36,8 +36,8 @@
                   >
                     <option value="">
                       {{ horariosDisponibles.length === 0 
-                        ? '-- No hay clases disponibles --' 
-                        : '-- Selecciona una clase --' 
+                        ? t('views.noAvailableClasses')
+                        : t('views.selectClass')
                       }}
                     </option>
                     <option 
@@ -52,15 +52,15 @@
 
                 <div class="col-12">
                   <div v-if="puntosCalculados > 0" class="alert alert-info" role="alert">
-                    <strong>Puntos a ganar:</strong> {{ puntosCalculados }} puntos
+                    <strong>{{ t('views.pointsToEarn') }}</strong> {{ puntosCalculados }} {{ t('views.points') }}
                   </div>
                 </div>
 
                 <div class="col-12 d-flex justify-content-end gap-2">
-                  <button type="reset" class="btn btn-secondary">Limpiar</button>
+                  <button type="reset" class="btn btn-secondary">{{ t('views.clear') }}</button>
                   <button type="submit" class="btn btn-success" :disabled="cargando">
                     <span v-if="cargando" class="spinner-border spinner-border-sm me-2"></span>
-                    Registrar Guardia
+                    {{ t('views.registerGuard') }}
                   </button>
                 </div>
               </div>
@@ -88,14 +88,14 @@
       <div class="col-lg-4">
         <div class="card mb-4 bg-light">
           <div class="card-header bg-success text-white">
-            <h5 class="mb-0">⭐ Resumen de Puntos</h5>
+            <h5 class="mb-0">{{ t('views.pointsSummary') }}</h5>
           </div>
           <div class="card-body text-center">
             <h2 class="display-4 text-success">{{ puntosTotales }}</h2>
-            <p class="text-muted">Puntos totales acumulados</p>
+            <p class="text-muted">{{ t('views.totalPoints') }}</p>
             <hr />
             <p class="small text-muted">
-              <strong>{{ numeroGuardias }}</strong> guardias registradas
+              <strong>{{ numeroGuardias }}</strong> {{ t('views.registeredGuardsCount') }}
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@
         <!-- Leyenda de Puntos -->
         <div class="card">
           <div class="card-header bg-info text-white">
-            <h6 class="mb-0">📊 Escala de Puntos</h6>
+            <h6 class="mb-0">{{ t('views.pointsScale') }}</h6>
           </div>
           <div class="card-body">
             <ul class="list-unstyled small">
@@ -122,24 +122,24 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">📅 Mis Guardias Registradas</h5>
+            <h5 class="mb-0">{{ t('views.registeredGuards') }}</h5>
           </div>
           <div class="card-body">
             <div v-if="guardiasRegistradas.length === 0" class="alert alert-info text-center">
-              No hay guardias registradas
+              {{ t('views.noRegisteredGuards') }}
             </div>
 
             <div v-else class="table-responsive">
               <table class="table table-striped table-hover">
                 <thead class="table-dark">
                   <tr>
-                    <th>Fecha</th>
-                    <th>Curso</th>
-                    <th>Asignatura</th>
-                    <th>Aula</th>
-                    <th>Franja Horaria</th>
-                    <th>Puntos</th>
-                    <th>Acciones</th>
+                    <th>{{ t('views.date') }}</th>
+                    <th>{{ t('views.course') }}</th>
+                    <th>{{ t('views.subject') }}</th>
+                    <th>{{ t('views.classroom') }}</th>
+                    <th>{{ t('views.guardHour') }}</th>
+                    <th>{{ t('views.points') }}</th>
+                    <th>{{ t('views.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -178,6 +178,9 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
+import { useI18n } from '../composables/useI18n'
+
+const { t } = useI18n()
 
 const formularioGuardia = ref({
   fecha: '',

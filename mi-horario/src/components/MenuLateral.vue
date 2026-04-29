@@ -13,9 +13,9 @@
     style="z-index: 1050">
     <div class="text-center text-white">
       <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Cargando...</span>
+        <span class="visually-hidden">{{ t('modal.uploadingFile') }}</span>
       </div>
-      <p class="mt-3">Subiendo archivo...</p>
+      <p class="mt-3">{{ t('modal.uploadingFile') }}</p>
     </div>
   </div>
 
@@ -26,40 +26,39 @@
   <div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel" aria-labelledby="sidePanelLabel"
     data-bs-backdrop="false" data-bs-keyboard="false">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="sidePanelLabel">Menú lateral</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+      <h5 class="offcanvas-title" id="sidePanelLabel">{{ t('modal.lateralMenuTitle') }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" :aria-label="t('modal.closeButtonLabel')"></button>
     </div>
 
     <div class="offcanvas-body">
       <input ref="fileInput" type="file" @change="subirArchivoSelec" style="display: none" />
 
-      <router-link to="/home" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Inicio</router-link>
+      <router-link to="/home" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">{{ t('modal.sidemenuHome') }}</router-link>
 
       <div v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'">
-        <router-link to="/subir-archivo" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Subir archivo de datos</router-link>
-        <router-link to="/datos-profesorado" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">Datos
-          profesorado</router-link>
+        <router-link to="/subir-archivo" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">{{ t('modal.sidemenuUploadData') }}</router-link>
+        <router-link to="/datos-profesorado" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">{{ t('modal.sidemenuTeacherData') }}</router-link>
         <button class="btn btn-primary w-100 mb-2" @click="generarParteDiario">
-          Generar partes diario
+          {{ t('menu.dailyReports') }}
         </button>
 
       </div>
 
       <div v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'">
         <router-link to="/mis-horario" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
-          Mis horarios
+          {{ t('modal.sidemenuMySchedules') }}
         </router-link>
         <button class="btn btn-primary w-100 mb-2" @click="descargarHorarioPDF">
-          Descargar horario (PDF)
+          {{ t('menu.downloadSchedulePdf') }}
         </button>
       </div>
 
       <router-link to="/mis-ausencias" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
-        Ausencia
+        {{ t('modal.sidemenuAbsence') }}
       </router-link>
 
       <router-link to="/guardias" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
-        📋 Guardias
+        {{ t('modal.sidemenuGuards') }}
       </router-link>
 
     </div>
@@ -76,8 +75,10 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import api from '../axios'
 import modalmensaje from '../components/ModalMensaje.vue'
 import Horario from '../components/Horario.vue'
+import { useI18n } from '../composables/useI18n'
 
 
 // Estado del modal
@@ -91,12 +92,13 @@ const fileInput = ref(null)
 const cargando = ref(false)
 const router = useRouter()
 const menuAbierto = ref(false)
+const { t } = useI18n()
 
 
 onMounted(() => {
   // Mostrar modal tras recarga si corresponde
   if (localStorage.getItem('mostrarModalImportacion') === '1') {
-    mostrarModal('Importación exitosa', 'Archivo importado correctamente.', 'success')
+    mostrarModal(t('modal.importSuccessTitle'), t('modal.importSuccessMessage'), 'success')
     localStorage.removeItem('mostrarModalImportacion')
   }
 
@@ -146,14 +148,14 @@ function subirArchivoSelec(event) {
       console.log(' Respuesta del backend:', response.data)
 
       // Mostrar modal con mensaje genérico
-      mostrarModal(' Importación exitosa', response.data , 'success')
+      mostrarModal(t('modal.importSuccessTitle'), response.data , 'success')
 
       // Refrescar el horario (función expuesta desde el componente Horario.vue)
       Horario.value?.cargarDatos()
 
     } catch (error) {
       console.error(' Error al importar el archivo:', error)
-      mostrarModal(' Error', 'No se pudo importar el archivo.', 'error')
+      mostrarModal(t('modal.importErrorTitle'), t('modal.importErrorMessage'), 'error')
     } finally {
       cargando.value = false
     }
@@ -222,11 +224,7 @@ function cerrarModal() {
 async function generarParteDiario() {
   cargando.value = true
   try {
-    const response = await axios.get('http://localhost:8081/api/parte-ausencias', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    })
+    const response = await api.get('/parte-ausencias')
 
     const base64PDF = response.data
     const byteCharacters = atob(base64PDF)
@@ -253,7 +251,7 @@ async function generarParteDiario() {
 
   } catch (error) {
     console.error('Error al generar el parte diario:', error)
-    mostrarModal('Error', 'No se pudo generar el parte diario.', 'error')
+    mostrarModal(t('modal.dailyReportError'), t('modal.dailyReportErrorMessage'), 'error')
   } finally {
     cargando.value = false
   }
@@ -262,10 +260,7 @@ async function generarParteDiario() {
 async function descargarHorarioPDF() {
   cargando.value = true
   try {
-    const response = await axios.get('http://localhost:8081/api/horarios/pdf/mis-horarios', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
+    const response = await api.get('/horarios/pdf/mis-horarios', {
       responseType: 'blob'
     })
 
@@ -293,11 +288,23 @@ async function descargarHorarioPDF() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
 
-    mostrarModal('Éxito', 'Horario descargado correctamente.', 'success')
+    mostrarModal(t('modal.scheduleDownloadSuccess'), t('modal.scheduleDownloadedMessage'), 'success')
 
   } catch (error) {
     console.error('Error al descargar el horario PDF:', error)
-    mostrarModal('Error', 'No se pudo descargar el horario en PDF.', 'error')
+    let mensaje = t('modal.scheduleDownloadErrorMessage')
+    if (error?.response?.data instanceof Blob) {
+      try {
+        const texto = await error.response.data.text()
+        const json = JSON.parse(texto)
+        mensaje = json?.error || json?.message || mensaje
+      } catch (e) {
+        mensaje = `Error ${error.response?.status || ''}`.trim() || mensaje
+      }
+    } else if (error?.response?.status) {
+      mensaje = `Error ${error.response.status}`
+    }
+    mostrarModal('Error', mensaje, 'error')
   } finally {
     cargando.value = false
   }

@@ -1,38 +1,38 @@
 <template>
   <div class="contenedor-ausencias">
     <div>
-      <h2 class="mb-4">{{ esAdmin ? 'Ausencias del profesorado' : 'Mis Ausencias' }}</h2>
+      <h2 class="mb-4">{{ esAdmin ? t('views.absencesStaffTitle') : t('views.absenceTitle') }}</h2>
 
       <!-- Botones de control -->
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <!-- Botón para mostrar/ocultar formulario -->
         <button v-if="!esAdmin" class="btn btn-outline-primary" @click="mostrarFormulario = !mostrarFormulario">
-          {{ mostrarFormulario ? 'Ocultar formulario' : 'Crear Ausencia' }}
+          {{ mostrarFormulario ? t('views.hideForm') : t('views.createAbsence') }}
         </button>
 
         <!-- Buscador por fecha -->
         <!-- Nuevo buscador avanzado por día, mes y/o año -->
         <div class="filtro-fecha">
-          <label class="form-label mb-0">Filtrar por fecha:</label>
+          <label class="form-label mb-0">{{ t('views.filterByDate') }}</label>
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <input type="text" class="form-control" placeholder="Día (dd)" v-model="filtroDia" style="width: 100px;" />
-            <input type="text" class="form-control" placeholder="Mes (mm)" v-model="filtroMes" style="width: 100px;" />
-            <input type="text" class="form-control" placeholder="Año (aaaa)" v-model="filtroAnio"
+            <input type="text" class="form-control" :placeholder="t('views.filterDay')" v-model="filtroDia" style="width: 100px;" />
+            <input type="text" class="form-control" :placeholder="t('views.filterMonth')" v-model="filtroMes" style="width: 100px;" />
+            <input type="text" class="form-control" :placeholder="t('views.filterYear')" v-model="filtroAnio"
               style="width: 120px;" />
-            <button class="btn btn-outline-primary" @click="filtrarPorFechaAvanzado">Buscar</button>
-            <button class="btn btn-outline-secondary" @click="resetearFiltro">Mostrar todas</button>
+            <button class="btn btn-outline-primary" @click="filtrarPorFechaAvanzado">{{ t('views.search') }}</button>
+            <button class="btn btn-outline-secondary" @click="resetearFiltro">{{ t('views.showAll') }}</button>
             <button class="btn btn-outline-success" @click="exportarCsv" :disabled="ausenciasFiltradas.length === 0">
-              Exportar CSV
+              {{ t('views.exportCsv') }}
             </button>
           </div>
         </div>
 
         <div v-if="esAdmin" class="filtro-profesor">
-          <label class="form-label mb-0">Filtrar por profesor:</label>
+          <label class="form-label mb-0">{{ t('views.filterByTeacher') }}</label>
           <input
             type="text"
             class="form-control"
-            placeholder="Nombre del profesor"
+            :placeholder="t('views.teacherName')"
             v-model="filtroProfesor"
             style="min-width: 220px;"
           />
@@ -46,27 +46,27 @@
     <!-- Formulario para crear nueva ausencia -->
     <div v-if="mostrarFormulario && !esAdmin" class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title">Registrar nueva ausencia</h5>
+        <h5 class="card-title">{{ t('views.registerNewAbsence') }}</h5>
         <form @submit.prevent="crearAusencia">
           <div class="row gy-2 gx-3">
             <div class="col-md-4">
-              <label for="fecha" class="form-label">Fecha</label>
+              <label for="fecha" class="form-label">{{ t('views.date') }}</label>
               <input type="date" v-model="nuevaAusencia.fecha" class="form-control" required />
             </div>
             <div class="col-md-4">
-              <label for="horaInicio" class="form-label">Hora inicio</label>
+              <label for="horaInicio" class="form-label">{{ t('views.startTime') }}</label>
               <input type="time" v-model="nuevaAusencia.horaInicio" class="form-control" />
             </div>
             <div class="col-md-4">
-              <label for="horaFin" class="form-label">Hora fin</label>
+              <label for="horaFin" class="form-label">{{ t('views.endTime') }}</label>
               <input type="time" v-model="nuevaAusencia.horaFin" class="form-control" />
             </div>
             <div class="col-12">
-              <label for="motivo" class="form-label">Motivo</label>
+              <label for="motivo" class="form-label">{{ t('views.reason') }}</label>
               <input type="text" v-model="nuevaAusencia.motivo" class="form-control" required />
             </div>
             <div class="col-12 d-flex justify-content-end mt-3">
-              <button type="submit" class="btn btn-success">Crear ausencia</button>
+              <button type="submit" class="btn btn-success">{{ t('views.createAbsence') }}</button>
             </div>
           </div>
         </form>
@@ -74,7 +74,7 @@
     </div>
 
     <div v-if="ausencias.length === 0" class="alert alert-info">
-      No tienes ausencias registradas.
+      {{ t('views.noAbsences') }}
     </div>
 
     <div>
@@ -84,7 +84,7 @@
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <span>{{ formatFecha(ausenciaDia.fecha) }}</span>
               <button v-if="!esAdmin" class="btn btn-sm btn-danger" @click="eliminarAusencia({ fecha: ausenciaDia.fecha })">
-                Eliminar
+                {{ t('views.delete') }}
               </button>
             </div>
 
@@ -92,14 +92,14 @@
               <table class="table table-bordered table-hover align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th scope="col">Hora</th>
+                    <th scope="col">{{ t('views.time') }}</th>
                     <th v-if="esAdmin" scope="col">Profesor</th>
-                    <th scope="col">Asignatura</th>
-                    <th scope="col">Aula</th>
-                    <th scope="col">Curso</th>
-                    <th scope="col">Motivo</th>
-                    <th scope="col">Justificada</th>
-                    <th scope="col">Eliminar</th>
+                    <th scope="col">{{ t('views.subject') }}</th>
+                    <th scope="col">{{ t('views.classroom') }}</th>
+                    <th scope="col">{{ t('views.course') }}</th>
+                    <th scope="col">{{ t('views.reason') }}</th>
+                    <th scope="col">{{ t('views.justified') }}</th>
+                    <th scope="col">{{ t('views.delete') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -114,7 +114,7 @@
                     <td>{{ ausencia.descripcion }}</td>
                     <td>
                       <span class="badge" :class="ausencia.justificada ? 'bg-success' : 'bg-danger'">
-                        {{ ausencia.justificada ? 'Sí' : 'No' }}
+                        {{ ausencia.justificada ? t('views.yes') : t('views.no') }}
                       </span>
                     </td>
                     <td>
@@ -141,9 +141,11 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import ModalMensaje from '../components/ModalMensaje.vue'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from '../composables/useI18n'
 
 
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const esAdmin = computed(() => {
   const rol = auth.usuario?.rol
@@ -308,7 +310,7 @@ const crearAusencia = async () => {
       }
     })
 
-    mostrarModal('Ausencia creada', 'Ausencia creada correctamente.', 'success')
+    mostrarModal('Ausencia creada', t('views.createAbsence') + ' ' + t('views.success'), 'success')
     nuevaAusencia.value = { fecha: '', horaInicio: '', horaFin: '', motivo: '' }
     cargarAusencias()
   } catch (error) {

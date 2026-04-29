@@ -1,12 +1,19 @@
 <template>
   <div class="container-fluid pt-4">
+    <div v-if="errorCarga" class="alert alert-danger py-2" role="alert">
+      {{ errorCarga }}
+    </div>
+    <div v-else-if="!cargando && horario.length === 0" class="alert alert-info py-2" role="alert">
+      No hay horario disponible para este profesor.
+    </div>
+
     <!-- Vista escritorio -->
     <div class="d-none d-md-block">
       <table class="table table-bordered text-start align-middle w-100 small">
         <thead class="table-dark text-center">
           <tr>
-            <th style="width: 100px;">Franja</th>
-            <th v-for="dia in diasSemana" :key="dia" style="width: 130px;">{{ dia }}</th>
+            <th style="width: 100px;">{{ t('schedule.period') }}</th>
+            <th v-for="dia in diasSemana" :key="dia" style="width: 130px;">{{ traducirDia(dia) }}</th>
           </tr>
         </thead>
         <tbody>
@@ -21,13 +28,13 @@
                     ? obtenerEstilosAsignatura(getClases(dia, franja)[0].asignatura?.nombre)
                     : {}">
               <div v-if="esRecreo(franja)">
-                <strong>Recreo</strong>
+                <strong>{{ t('schedule.break') }}</strong>
               </div>
               <div v-else>
                 <div v-for="(clase, i) in getClases(dia, franja)" :key="i" class="mb-1">
-                  Aula: {{ clase.aula?.codigo || '-' }}<br />
-                  Curso: {{ clase.curso?.nombre || '-' }}<br />
-                  Asig: {{ clase.asignatura?.nombre || '-' }}
+                  {{ t('schedule.classroom') }}: {{ clase.aula?.codigo || '-' }}<br />
+                  {{ t('schedule.course') }}: {{ clase.curso?.nombre || '-' }}<br />
+                  {{ t('schedule.subject') }}: {{ clase.asignatura?.nombre || '-' }}
                   <hr v-if="getClases(dia, franja).length > 1 && i < getClases(dia, franja).length - 1" />
                 </div>
               </div>
@@ -41,14 +48,14 @@
     <div class="d-md-none">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <button class="btn btn-sm btn-outline-secondary" @click="diaAnterior" :disabled="diaActualIndex === 0">←</button>
-        <strong>{{ diasSemana[diaActualIndex] }}</strong>
+        <strong>{{ traducirDia(diaActual) }}</strong>
         <button class="btn btn-sm btn-outline-secondary" @click="diaSiguiente" :disabled="diaActualIndex === diasSemana.length - 1">→</button>
       </div>
       <table class="table table-bordered text-start align-middle w-100 small">
         <thead class="table-dark text-center">
           <tr>
-            <th style="width: 100px;">Franja</th>
-            <th style="width: 100%">Horario</th>
+            <th style="width: 100px;">{{ t('schedule.period') }}</th>
+            <th style="width: 100%">{{ t('schedule.schedule') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -63,13 +70,13 @@
                   ? obtenerEstilosAsignatura(getClases(diaActual, franja)[0].asignatura?.nombre)
                   : {}">
               <div v-if="esRecreo(franja)">
-                <strong>Recreo</strong>
+                <strong>{{ t('schedule.break') }}</strong>
               </div>
               <div v-else>
                 <div v-for="(clase, i) in getClases(diaActual, franja)" :key="i" class="mb-1">
-                  Aula: {{ clase.aula?.codigo || '-' }}<br />
-                  Curso: {{ clase.curso?.nombre || '-' }}<br />
-                  Asig: {{ clase.asignatura?.nombre || '-' }}
+                  {{ t('schedule.classroom') }}: {{ clase.aula?.codigo || '-' }}<br />
+                  {{ t('schedule.course') }}: {{ clase.curso?.nombre || '-' }}<br />
+                  {{ t('schedule.subject') }}: {{ clase.asignatura?.nombre || '-' }}
                   <hr v-if="getClases(diaActual, franja).length > 1 && i < getClases(diaActual, franja).length - 1" />
                 </div>
               </div>
@@ -83,9 +90,10 @@
 
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import { useI18n } from '../composables/useI18n'
 
 // Props: accept either idProfesor or profesorId (kebab-case from parent), and an explicit fetchAll
 const props = defineProps({
@@ -94,15 +102,21 @@ const props = defineProps({
   fetchAll: { type: Boolean, default: false },
   misHorarios: { type: Boolean, default: false }
 })
+const { t } = useI18n()
 
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
 const diaActualIndex = ref(0)
 const diaActual = computed(() => diasSemana[diaActualIndex.value])
 const horario = ref([])
+const cargando = ref(false)
+const errorCarga = ref('')
 const route = useRoute()
-const idFromRoute = route.params.id || null
-// Effective id: prop takes precedence, then route param
-const effectiveIdProfesor = props.idProfesor ?? props.profesorId ?? idFromRoute ?? null
+const effectiveIdProfesor = computed(() => {
+  const idFromRoute = route.params.id ?? null
+  const rawId = props.idProfesor ?? props.profesorId ?? idFromRoute ?? null
+  const parsed = Number(rawId)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+})
 
 const franjasFijas = [
   { idFranja: 'R1', horaInicio: '18:00:00', horaFin: '18:15:00' },
@@ -112,7 +126,8 @@ const franjasFijas = [
 const franjasOrdenadas = computed(() => {
   const mapa = new Map()
   for (const h of horario.value) {
-    const clave = h.franja.horaInicio
+    const clave = h?.franja?.horaInicio
+    if (!clave) continue
     if (!mapa.has(clave)) mapa.set(clave, h.franja)
   }
 
@@ -121,7 +136,7 @@ const franjasOrdenadas = computed(() => {
     mapa.set(recreoSiempre.horaInicio, recreoSiempre)
   }
 
-  const tieneClasesDespuesDe18 = horario.value.some(h => h.franja.horaInicio > '18:00:00')
+  const tieneClasesDespuesDe18 = horario.value.some(h => (h?.franja?.horaInicio || '') > '18:00:00')
   const recreoTarde = franjasFijas.find(f => f.horaInicio === '18:00:00')
   if (tieneClasesDespuesDe18 && recreoTarde && !mapa.has(recreoTarde.horaInicio)) {
     mapa.set(recreoTarde.horaInicio, recreoTarde)
@@ -132,8 +147,19 @@ const franjasOrdenadas = computed(() => {
 
 function getClases(dia, franja) {
   return horario.value.filter(
-    h => h.dia === dia && h.franja.horaInicio.slice(0, 5) === franja.horaInicio.slice(0, 5)
+    h => h.dia === dia && h?.franja?.horaInicio?.slice(0, 5) === franja.horaInicio.slice(0, 5)
   )
+}
+
+function traducirDia(dia) {
+  const mapa = {
+    Lunes: t('days.monday'),
+    Martes: t('days.tuesday'),
+    Miércoles: t('days.wednesday'),
+    Jueves: t('days.thursday'),
+    Viernes: t('days.friday')
+  }
+  return mapa[dia] || dia
 }
 
 function esRecreo(franja) {
@@ -154,18 +180,63 @@ function diaSiguiente() {
   if (diaActualIndex.value < diasSemana.length - 1) diaActualIndex.value++
 }
 
-onMounted(async () => {
+function normalizarDia(valorDia) {
+  const crudo = String(valorDia || '').trim()
+  const normalizado = crudo
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
+  const mapa = {
+    L: 'Lunes',
+    LUNES: 'Lunes',
+    M: 'Martes',
+    MARTES: 'Martes',
+    X: 'Miércoles',
+    MIERCOLES: 'Miércoles',
+    J: 'Jueves',
+    JUEVES: 'Jueves',
+    V: 'Viernes',
+    VIERNES: 'Viernes'
+  }
+
+  return mapa[normalizado] || crudo || '-'
+}
+
+function normalizarItemHorario(item) {
+  const horaInicio = item?.franja?.horaInicio || item?.horaInicio || null
+  const horaFin = item?.franja?.horaFin || item?.horaFin || null
+
+  return {
+    id: item?.id,
+    dia: normalizarDia(item?.dia),
+    franja: {
+      horaInicio,
+      horaFin
+    },
+    aula: item?.aula?.codigo ? item.aula : { codigo: item?.aula || '-' },
+    curso: item?.curso?.nombre ? item.curso : { nombre: item?.curso || '-' },
+    asignatura: item?.asignatura?.nombre ? item.asignatura : { nombre: item?.asignatura || '-' },
+    puntos: item?.puntos != null ? item.puntos : null
+  }
+}
+
+async function cargarHorario() {
+  cargando.value = true
+  errorCarga.value = ''
+
   try {
     // Do not fetch the entire dataset by default. Fetch only when a professor id is provided
     // or when explicitly requested via fetchAll prop.
-    if (!effectiveIdProfesor && !props.fetchAll && !props.misHorarios) {
+    if (!effectiveIdProfesor.value && !props.fetchAll && !props.misHorarios) {
       horario.value = []
+      cargando.value = false
       return
     }
 
     let url = 'http://localhost:8081/api/horarios'
-    if (effectiveIdProfesor) {
-      url = `http://localhost:8081/api/horarios?idProfesor=${effectiveIdProfesor}`
+    if (effectiveIdProfesor.value) {
+      url = `http://localhost:8081/api/horarios?idProfesor=${encodeURIComponent(effectiveIdProfesor.value)}`
     } else if (props.misHorarios) {
       url = 'http://localhost:8081/api/horarios/mis-horarios'
     }
@@ -174,30 +245,30 @@ onMounted(async () => {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
 
-    const diaMap = { L: 'Lunes', M: 'Martes', X: 'Miércoles', J: 'Jueves', V: 'Viernes' }
-
     const rawData = Array.isArray(response.data) ? response.data : []
 
-    if (props.misHorarios) {
-      horario.value = rawData.map(item => ({
-        id: item.id,
-        dia: diaMap[String(item.dia).toUpperCase()] || item.dia || '-',
-        franja: {
-          horaInicio: item.horaInicio ? item.horaInicio : '00:00:00',
-          horaFin: item.horaFin ? item.horaFin : '00:00:00'
-        },
-        aula: { codigo: item.aula || '-' },
-        curso: { nombre: item.curso || '-' },
-        asignatura: { nombre: item.asignatura || '-' },
-        puntos: item.puntos != null ? item.puntos : null
-      }))
-    } else {
-      horario.value = rawData.map(item => ({ ...item, dia: diaMap[item.dia] || item.dia }))
-    }
+    horario.value = rawData
+      .map(normalizarItemHorario)
+      .filter(item => item?.franja?.horaInicio && item?.franja?.horaFin)
   } catch (error) {
     console.error('Error al cargar el horario:', error)
+    horario.value = []
+    const status = error?.response?.status
+    errorCarga.value = status
+      ? `No se pudo cargar el horario (HTTP ${status}).`
+      : 'No se pudo cargar el horario.'
+  } finally {
+    cargando.value = false
   }
-})
+}
+
+watch(
+  () => [props.idProfesor, props.profesorId, props.fetchAll, props.misHorarios, route.params.id],
+  () => {
+    cargarHorario()
+  },
+  { immediate: true }
+)
 
 const coloresAsignaturas = ref({})
 const paletaColoresSuaves = [
