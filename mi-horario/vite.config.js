@@ -11,5 +11,13 @@ export default defineConfig({
       usePolling: true, // RELEVANTE: Obliga a Vite a revisar cambios manualmente
       interval: 100,    // Revisa cada 100ms
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
   },
 })
