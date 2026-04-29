@@ -66,7 +66,7 @@ function subirImagen(event) {
   formData.append('imagen', archivo)
 
   axios.post(
-    `http://localhost:8081/api/usuarios/${auth.usuario.id}/imagen`,
+    `/api/usuarios/${auth.usuario.id}/imagen`,
     formData,
     {
       headers: {
@@ -85,7 +85,7 @@ function subirImagen(event) {
 async function cargarImagenConToken() {
   try {
     const response = await axios.get(
-      `http://localhost:8081/api/usuarios/${auth.usuario.id}/imagen`,
+      `/api/usuarios/${auth.usuario.id}/imagen`,
       {
         headers: {
           Authorization: `Bearer ${auth.token}`
@@ -121,7 +121,7 @@ async function cambiarPassword() {
 
   try {
     await axios.put(
-      `http://localhost:8081/api/usuarios/${auth.usuario.id}/cambiar-Contrasena`,
+      `/api/usuarios/${auth.usuario.id}/cambiar-Contrasena`,
       { nuevaContrasena: nuevaPassword.value },
       {
         headers: { Authorization: `Bearer ${auth.token}` }

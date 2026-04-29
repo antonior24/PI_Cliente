@@ -145,7 +145,7 @@ async function login() {
 async function enviarCorreo() {
   mensaje.value = ''
   try {
-    const { data } = await axios.post('http://localhost:8081/api/recuperacion-password', {
+    const { data } = await axios.post('/api/recuperacion-password', {
       correoRecuperacion: correo.value
     })
 

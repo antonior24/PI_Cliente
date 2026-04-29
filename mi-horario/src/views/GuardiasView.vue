@@ -211,7 +211,7 @@ async function cargarHorarios() {
     const fechaParam = formularioGuardia.value.fecha || new Date().toISOString().split('T')[0]
     
     console.log('🔄 Fetching horarios disponibles para guardia en fecha:', fechaParam)
-    const response = await axios.get(`http://localhost:8081/api/guardias/horarios-disponibles?fecha=${fechaParam}`, {
+    const response = await axios.get(`/api/guardias/horarios-disponibles?fecha=${fechaParam}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
@@ -287,7 +287,7 @@ async function cargarHorarios() {
 // Cargar guardias registradas
 async function cargarGuardias() {
   try {
-    const response = await axios.get('http://localhost:8081/api/guardias/profesor', {
+    const response = await axios.get('/api/guardias/profesor', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
@@ -336,7 +336,7 @@ async function registrarGuardia() {
       fecha: formularioGuardia.value.fecha
     }
 
-    const response = await axios.post('http://localhost:8081/api/guardias', payload, {
+    const response = await axios.post('/api/guardias', payload, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
@@ -369,7 +369,7 @@ async function eliminarGuardia(idGuardia) {
   cargando.value = true
 
   try {
-    await axios.delete(`http://localhost:8081/api/guardias/${idGuardia}`, {
+    await axios.delete(`/api/guardias/${idGuardia}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
@@ -394,7 +394,7 @@ async function eliminarGuardia(idGuardia) {
 // Sincronizar puntos totales
 async function sincronizarPuntos() {
   try {
-    const response = await axios.get('http://localhost:8081/api/guardias/puntos', {
+    const response = await axios.get('/api/guardias/puntos', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'

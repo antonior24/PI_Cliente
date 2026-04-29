@@ -162,7 +162,7 @@ async function uploadFile() {
         const base64File = reader.result.split(',')[1]
 
         const response = await axios.post(
-          'http://localhost:8081/api/horarios/importacion',
+          '/api/horarios/importacion',
           { file: base64File },
           {
             headers: {
