@@ -120,7 +120,7 @@ async function buscarProfesores() {
 
   try {
     const response = await axios.get(
-      `http://localhost:8081/api/profesores/buscar?nombre=${encodeURIComponent(busqueda.value)}`,
+      `/api/profesores/buscar?nombre=${encodeURIComponent(busqueda.value)}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -136,7 +136,7 @@ async function buscarProfesores() {
 // Obtener todos los profesores
 async function obtenerTodosLosProfesores() {
   try {
-    const response = await axios.get('http://localhost:8081/api/profesores', {
+    const response = await axios.get('/api/profesores', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -177,7 +177,7 @@ async function guardarUsuario(datosFormulario) {
 
   try {
     const response = await axios.post(
-      `http://localhost:8081/api/usuarios/crear-con-profesor/${idProfesor}`,
+      `/api/usuarios/crear-con-profesor/${idProfesor}`,
       payload,
       {
         headers: {
@@ -221,7 +221,7 @@ async function eliminarUsuario(profesor) {
   if (!confirm(`¿Estás seguro de eliminar el usuario vinculado a ${profesor.nombre}?`)) return
 
   try {
-    await axios.delete(`http://localhost:8081/api/usuarios/${profesor.usuario.id}`, {
+    await axios.delete(`/api/usuarios/${profesor.usuario.id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -262,7 +262,7 @@ async function modificarUsuario(datosFormulario) {
 
   try {
     const response = await axios.put(
-      `http://localhost:8081/api/usuarios/${idUsuario}`,
+      `/api/usuarios/${idUsuario}`,
       payload,
       {
         headers: {

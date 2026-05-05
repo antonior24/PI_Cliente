@@ -43,7 +43,7 @@
   onMounted(async () => {
   try {
     const response = await axios.get(
-      `http://localhost:8081/api/profesores/${route.params.id}`,
+      `/api/profesores/${route.params.id}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -70,7 +70,7 @@
     isLoading.value = true
     try {
       const response = await axios.put(
-        `http://localhost:8081/api/usuarios/${payload.idUsuario}`,
+        `/api/usuarios/${payload.idUsuario}`,
         {
           nombre: payload.nombre,
           email: payload.email,

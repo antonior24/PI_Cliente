@@ -57,7 +57,7 @@
       idProfesor: props.idProfesor
     }
 
-    const response = await axios.post('http://localhost:8081/api/ausencias', payload, {
+    const response = await axios.post('/api/ausencias', payload, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'

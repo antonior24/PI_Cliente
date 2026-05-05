@@ -31,7 +31,7 @@ async function consultar() {
     const payload = { pregunta: pregunta.value }
     // si el usuario es administrador podría preguntar por otro profesor
     // aquí no usamos idProfesor, se podría añadir un campo adicional si se desea
-    const resp = await axios.post('http://localhost:8081/api/horarios/ia', payload, {
+    const resp = await axios.post('/api/horarios/ia', payload, {
       headers: {
         Authorization: `Bearer ${auth.token}`
       }

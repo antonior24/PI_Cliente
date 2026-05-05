@@ -138,7 +138,7 @@ function subirArchivoSelec(event) {
     cargando.value = true
 
     try {
-      const response = await axios.post('http://localhost:8081/api/horarios/importacion', { file: base64File }, {
+      const response = await axios.post('/api/horarios/importacion', { file: base64File }, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`

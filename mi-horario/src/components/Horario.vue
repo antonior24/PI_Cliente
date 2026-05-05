@@ -234,11 +234,11 @@ async function cargarHorario() {
       return
     }
 
-    let url = 'http://localhost:8081/api/horarios'
+    let url = '/api/horarios'
     if (effectiveIdProfesor.value) {
-      url = `http://localhost:8081/api/horarios?idProfesor=${encodeURIComponent(effectiveIdProfesor.value)}`
+      url = `/api/horarios?idProfesor=${encodeURIComponent(effectiveIdProfesor.value)}`
     } else if (props.misHorarios) {
-      url = 'http://localhost:8081/api/horarios/mis-horarios'
+      url = '/api/horarios/mis-horarios'
     }
 
     const response = await axios.get(url, {
