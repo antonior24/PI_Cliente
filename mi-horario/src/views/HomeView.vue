@@ -32,7 +32,7 @@
                       <th>{{ t('views.course') }}</th>
                       <th>{{ t('views.subject') }}</th>
                       <th>{{ t('views.guardHour') }}</th>
-                      <th>{{ t('views.points') }}</th>
+                      <th>{{ t('views.classroom') }}</th>
                       <th>Estado de Cobertura</th>
                       <th>{{ t('views.actions') }}</th>
                     </tr>
@@ -43,9 +43,7 @@
                       <td>{{ ausencia.asignatura }}</td>
                       <td>{{ ausencia.franja }}</td>
                       <td>
-                        <span :class="`badge ${getBadgeClass(ausencia.puntos)}`">
-                          {{ ausencia.puntos }}
-                        </span>
+                        <strong>{{ ausencia.aula }}</strong>
                       </td>
                       <td>
                         <div v-if="ausencia.cubierta" class="d-flex align-items-center gap-2">
@@ -59,7 +57,7 @@
                       <td>
                         <button 
                           v-if="!ausencia.cubierta"
-                          @click="irARegistrarGuardia(ausencia)" 
+                          @click="registrarGuardiaDirecta(ausencia)" 
                           class="btn btn-sm btn-primary"
                           title="Registrar guardia"
                         >
@@ -90,7 +88,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
 import Horario from '../components/Horario.vue'
 import ModalCambioContraseña from '../components/ModalCambioContraseña.vue'
@@ -98,7 +95,6 @@ import { useAuthStore } from '../stores/auth'
 import { useI18n } from '../composables/useI18n'
 
 const auth = useAuthStore()
-const router = useRouter()
 const mostrarModal = ref(false)
 const { t } = useI18n()
 
@@ -115,7 +111,11 @@ const esProfesor = computed(() => {
 
 // Obtener fecha de hoy en formato YYYY-MM-DD
 function getFechaHoy() {
-  return new Date().toISOString().split('T')[0]
+  const fecha = new Date()
+  const anio = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const dia = String(fecha.getDate()).padStart(2, '0')
+  return `${anio}-${mes}-${dia}`
 }
 
 // Cargar ausencias disponibles para guardia HOY
@@ -136,6 +136,7 @@ async function cargarAusenciasHoy() {
         asignatura: h.asignatura || '—',
         franja: `${h.horaInicio || '—'} - ${h.horaFin || '—'}`,
         puntos: h.puntos || 0,
+        aula: h.aula?.codigo || h.aula || '—',
         dia: h.dia || '—'
       }))
     
@@ -207,18 +208,29 @@ async function cargarGuardiasDelProfesor() {
   }
 }
 
-// Determinar clase de badge según puntos
-function getBadgeClass(puntos) {
-  if (puntos === 4) return 'bg-success'
-  if (puntos === 3) return 'bg-warning text-dark'
-  if (puntos === 2) return 'bg-info'
-  if (puntos === 1) return 'bg-danger'
-  return 'bg-secondary'
-}
+// Registrar la guardia directamente desde Inicio
+async function registrarGuardiaDirecta(ausencia) {
+  if (!ausencia?.id) return
 
-// Navegar a la página de guardias
-function irARegistrarGuardia(horario) {
-  router.push('/guardias')
+  try {
+    const payload = {
+      idHorarioCobertura: ausencia.id,
+      fecha: getFechaHoy()
+    }
+
+    await axios.post('/api/guardias', payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    await Promise.all([cargarAusenciasHoy(), cargarGuardiasDelDiaHoy()])
+  } catch (error) {
+    console.error('Error al registrar la guardia desde Inicio:', error)
+    const mensajeError = error.response?.data?.message || error.response?.data || 'No se pudo registrar la guardia'
+    alert(typeof mensajeError === 'string' ? mensajeError : 'No se pudo registrar la guardia')
+  }
 }
 
 // Cargar datos al montar el componente
