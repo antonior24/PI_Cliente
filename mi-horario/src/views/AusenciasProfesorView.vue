@@ -423,6 +423,14 @@ onMounted(() => {
   padding-right: 50px;
 }
 
+@media (max-width: 768px) {
+  .contenedor-ausencias {
+    margin-top: 50px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 
 .filtro-fecha {
   display: flex;

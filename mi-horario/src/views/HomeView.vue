@@ -1,13 +1,15 @@
 <template>
   <ModalCambioContraseña :visible="mostrarModal" @cerrar="mostrarModal = false" />
-  <div class="mx-4" style="margin-top: 150px;">
+  <div class="mx-4 home-content">
     <!-- Mostrar horario del usuario logueado si es profesor -->
-    <div v-if="esProfesor" class="container-fluid">
-      <h2 class="mb-4">{{ t('views.homeMySchedule') }}</h2>
-      <Horario :mis-horarios="true" />
+    <div v-if="esProfesor" class="container-fluid home-profesor-layout">
+      <div class="bloque-horario">
+        <h2 class="mb-4 titulo-mi-horario">{{ t('views.homeMySchedule') }}</h2>
+        <Horario :mis-horarios="true" />
+      </div>
 
       <!-- Sección de Guardias para HOY -->
-      <div class="row mt-5">
+      <div class="row mt-5 bloque-ausencias-hoy">
         <!-- Ausencias disponibles para cubrir HOY - con estado de cobertura -->
         <div class="col-12">
           <div class="card mb-4">
@@ -242,6 +244,36 @@ onActivated(async () => {
 })
 
 </script>
+
+<style scoped>
+.home-content {
+  margin-top: 150px;
+}
+
+@media (max-width: 768px) {
+  .home-content {
+    margin-top: 50px;
+  }
+
+  .home-profesor-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bloque-ausencias-hoy {
+    order: 1;
+    margin-top: 0.75rem !important;
+  }
+
+  .bloque-horario {
+    order: 2;
+  }
+
+  .titulo-mi-horario {
+    display: none;
+  }
+}
+</style>
 
 <style scoped>
 .card-header {

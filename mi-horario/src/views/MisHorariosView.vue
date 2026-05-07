@@ -42,4 +42,10 @@ onMounted(() => {
 .container {
   margin-top: 90px;
 }
+
+@media (max-width: 768px) {
+  .container {
+    margin-top: 50px;
+  }
+}
 </style>

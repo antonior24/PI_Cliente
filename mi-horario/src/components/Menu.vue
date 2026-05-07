@@ -16,6 +16,11 @@
 
 
       <!-- Botón de perfil solo en móvil -->
+      <!-- Botón toggler para móvil: muestra/oculta el menú colapsado -->
+      <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
       <ul class="navbar-nav d-lg-none ms-auto">
         <li class="nav-item">
           <router-link to="/perfil" class="nav-link p-0">
@@ -530,4 +535,30 @@ async function descargarHorarioPDF() {
 .modal-warning {
   border-left: 8px solid #ffc107;
 }
+
+/* Mobile: fondo del collapse para que el menú sea legible */
+@media (max-width: 991.98px) {
+  .navbar {
+    position: relative;
+  }
+
+  .navbar .collapse.navbar-collapse {
+    background-color: #212529; /* color oscuro similar a bg-dark */
+    position: absolute;
+    top: 70px; /* justo debajo de la navbar */
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    z-index: 1054;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+
+  .navbar .collapse.navbar-collapse .nav-link {
+    color: #ffffff !important;
+    padding: 0.5rem 0.25rem;
+  }
+}
 </style>
+
+
