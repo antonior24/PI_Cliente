@@ -59,7 +59,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="franja in franjasOrdenadas" :key="franja.horaInicio">
+          <tr v-for="franja in franjasConClaseEnDiaActual" :key="franja.horaInicio">
             <td class="bg-light fw-bold text-center">
               {{ franja.horaInicio.slice(0, 5) }} - {{ franja.horaFin.slice(0, 5) }}
             </td>
@@ -143,6 +143,28 @@ const franjasOrdenadas = computed(() => {
   }
 
   return Array.from(mapa.values()).sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
+})
+
+// Para móvil: solo las franjas con clases en el día actual
+const franjasConClaseEnDiaActual = computed(() => {
+  const franjasDelDia = new Map()
+  
+  for (const h of horario.value) {
+    if (h.dia === diaActual.value) {
+      const clave = h?.franja?.horaInicio
+      if (clave && !franjasDelDia.has(clave)) {
+        franjasDelDia.set(clave, h.franja)
+      }
+    }
+  }
+
+  // Incluir recreo si existe en franjasOrdenadas
+  const recreoFranja = franjasOrdenadas.value.find(f => esRecreo(f))
+  if (recreoFranja && !franjasDelDia.has(recreoFranja.horaInicio)) {
+    franjasDelDia.set(recreoFranja.horaInicio, recreoFranja)
+  }
+
+  return Array.from(franjasDelDia.values()).sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
 })
 
 function getClases(dia, franja) {
