@@ -15,8 +15,7 @@ import { useAuthStore } from './stores/auth'
 
 import Menu from './components/Menu.vue'
 import Footer from './components/Footer.vue'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+// Bootstrap is imported centrally in `src/main.js`
 
 const route = useRoute()
 const auth = useAuthStore()

@@ -1,7 +1,7 @@
 <template>
-  <div class=" mt-5 pt-4 px-3">
+  <div class="datos-profesorado-wrapper px-3">
 
-    <div class="mb-4 d-flex justify-content-center mt-5" style="margin-top: 200px;">
+    <div class="mb-4 d-flex justify-content-center mt-5 bloque-buscador-superior">
   <BuscadorProfesores @buscar="buscarProfesoresDesdeEvento" />
 </div>
 
@@ -327,11 +327,20 @@ function obtenerIdProfesor(profesor) {
 
 
 <style scoped>
-/* En móviles, añade más separación desde arriba */
+/* Separación superior del bloque principal de búsqueda */
+.bloque-buscador-superior {
+  margin-top: 200px !important;
+}
+
 @media (max-width: 800px) {
-  .main-content {
-    margin-top: 130px !important;
+  .bloque-buscador-superior {
+    margin-top: 50px !important;
   }
+}
+
+.datos-profesorado-wrapper {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Estilo del buscador */
