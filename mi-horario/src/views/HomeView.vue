@@ -14,7 +14,7 @@
         <div class="col-12">
           <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-              <h5 class="mb-0">📅 Ausencias disponibles para cubrir HOY</h5>
+              <h5 class="mb-0">Ausencias disponibles para cubrir HOY</h5>
             </div>
             <div class="card-body">
               <div v-if="cargandoGuardias" class="text-center">
@@ -23,7 +23,7 @@
                 </div>
               </div>
               <div v-else-if="ausenciasConEstado.length === 0" class="alert alert-info text-center mb-0">
-                ✅ No hay ausencias para cubrir hoy
+                No hay ausencias para cubrir hoy
               </div>
               <div v-else class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
@@ -61,7 +61,7 @@
                           class="btn btn-sm btn-primary"
                           title="Registrar guardia"
                         >
-                          ➕
+                          Registrar
                         </button>
                         <span v-else class="text-success">✓</span>
                       </td>
