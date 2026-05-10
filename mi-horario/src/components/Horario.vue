@@ -94,6 +94,7 @@ import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useI18n } from '../composables/useI18n'
+import { trackEvento } from '../utils/tracker'
 
 // Props: accept either idProfesor or profesorId (kebab-case from parent), and an explicit fetchAll
 const props = defineProps({
@@ -272,6 +273,14 @@ async function cargarHorario() {
     horario.value = rawData
       .map(normalizarItemHorario)
       .filter(item => item?.franja?.horaInicio && item?.franja?.horaFin)
+    
+    // Registrar evento de horario consultado
+    if (horario.value.length > 0) {
+      trackEvento('horario_consultado', {
+        cantidad: horario.value.length,
+        idProfesor: effectiveIdProfesor.value
+      })
+    }
   } catch (error) {
     console.error('Error al cargar el horario:', error)
     horario.value = []
