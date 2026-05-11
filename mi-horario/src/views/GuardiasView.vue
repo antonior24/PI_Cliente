@@ -159,7 +159,7 @@
                         @click="eliminarGuardia(guardia.id)"
                         class="btn btn-sm btn-danger"
                         :disabled="cargando"
-                        title="Eliminar guardia"
+                        title="Desregistrar guardia"
                       >
                         🗑️
                       </button>
@@ -364,7 +364,7 @@ async function registrarGuardia() {
 
 // Eliminar guardia
 async function eliminarGuardia(idGuardia) {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta guardia?')) return
+  if (!confirm('¿Estás seguro de que deseas desregistrarte de esta guardia?')) return
 
   cargando.value = true
 
@@ -378,13 +378,13 @@ async function eliminarGuardia(idGuardia) {
 
     await cargarGuardias()
     sincronizarPuntos()
-    mensaje.value = { tipo: 'exito', texto: '✅ Guardia eliminada' }
+    mensaje.value = { tipo: 'exito', texto: '✅ Guardia desregistrada correctamente' }
 
     setTimeout(() => {
       mensaje.value = { tipo: '', texto: '' }
     }, 2000)
   } catch (error) {
-    mensaje.value = { tipo: 'error', texto: 'Error al eliminar la guardia' }
+    mensaje.value = { tipo: 'error', texto: 'Error al desregistrar la guardia' }
     console.error('Error:', error)
   } finally {
     cargando.value = false
