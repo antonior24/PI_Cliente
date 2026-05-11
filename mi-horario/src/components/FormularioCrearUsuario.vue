@@ -21,12 +21,17 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Rol</label>
-      <select class="form-select" v-model="form.rol">
-        <option disabled value="">Selecciona un rol</option>
-        <option value="profesor">Profesor</option>
-        <option value="administrador">Equipo directivo</option>
-      </select>
+      <label class="form-label">Roles</label>
+      <div v-for="rol in rolesDisponibles" :key="rol.value" class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          :id="`rol-${rol.value}`"
+          :value="rol.value"
+          v-model="form.roles"
+        />
+        <label class="form-check-label" :for="`rol-${rol.value}`">{{ rol.label }}</label>
+      </div>
       <div class="text-danger" v-if="errores.rol">{{ errores.rol }}</div>
     </div>
 
@@ -50,10 +55,15 @@ const props = defineProps({
 
 const emit = defineEmits('guardar')
 
+const rolesDisponibles = [
+  { value: 'profesor', label: 'Profesor' },
+  { value: 'administrador', label: 'Equipo directivo' }
+]
+
 const form = reactive({
   email: '',
   password: '',
-  rol: ''
+  roles: []
 })
 
 function guardar() {
@@ -63,7 +73,7 @@ function guardar() {
     nombre: props.profesor.nombre,
     email: form.email,
     password: form.password,
-    rol: form.rol
+    rol: form.roles.join(',')
   })
 }
 

@@ -49,6 +49,7 @@ import api from '../axios'
 import Chart from 'chart.js/auto'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from '../composables/useI18n'
+import { tieneRol } from '../utils/roles'
 
 const auth = useAuthStore()
 const { t } = useI18n()
@@ -63,7 +64,7 @@ function obtenerIdProfesor(profesor) {
 
 onMounted(async () => {
   // Cargar lista de profesores si es administrador
-  if (auth.usuario?.rol?.toLowerCase() === 'administrador') {
+  if (tieneRol(auth.usuario?.rol, 'administrador')) {
     try {
       const response = await api.get('/profesores')
       profesores.value = response.data

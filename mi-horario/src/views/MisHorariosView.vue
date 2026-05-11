@@ -18,14 +18,14 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import Horario from '../components/Horario.vue'
 import { useI18n } from '../composables/useI18n'
+import { tieneRol } from '../utils/roles'
 
 const auth = useAuthStore()
 const router = useRouter()
 const { t } = useI18n()
 
 const isProfesor = computed(() => {
-  const rol = auth.usuario?.rol
-  return Boolean(rol && String(rol).toLowerCase() === 'profesor')
+  return tieneRol(auth.usuario?.rol, 'profesor')
 })
 
 onMounted(() => {

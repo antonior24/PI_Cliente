@@ -20,12 +20,17 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Rol</label>
-      <select class="form-select" v-model="form.rol">
-        <option disabled value="">Selecciona un rol</option>
-        <option value="profesor">Profesor</option>
-        <option value="administrador">Equipo directivo</option>
-      </select>
+      <label class="form-label">Roles</label>
+      <div v-for="rol in rolesDisponibles" :key="rol.value" class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          :id="`rol-editar-${rol.value}`"
+          :value="rol.value"
+          v-model="form.roles"
+        />
+        <label class="form-check-label" :for="`rol-editar-${rol.value}`">{{ rol.label }}</label>
+      </div>
       <div class="text-danger" v-if="errores.rol">{{ errores.rol }}</div>
     </div>
 
@@ -41,6 +46,7 @@
 
 <script setup>
 import { reactive, watch } from 'vue'
+import { descomponerRoles } from '../utils/roles'
 
 const emit = defineEmits();
 
@@ -51,17 +57,22 @@ const props = defineProps({
   isLoading: Boolean
 })
 
+const rolesDisponibles = [
+  { value: 'profesor', label: 'Profesor' },
+  { value: 'administrador', label: 'Equipo directivo' }
+]
+
 const form = reactive({
   email: props.profesor.usuario.email ,
   password: '',  // La contrasena puede ser opcional
-  rol: props.profesor.usuario.rol
+  roles: descomponerRoles(props.profesor.usuario.rol)
 })
 
 // Usar un watcher para actualizar el formulario cada vez que cambie el profesor
 watch(() => props.profesor, (nuevoProfesor) => {
   form.email = nuevoProfesor?.usuario?.email || '';  // Actualiza el email con los nuevos valores
   form.password = '';  // Puedes limpiar la contrasena si es necesario
-  form.rol = nuevoProfesor?.usuario?.rol || '';  // Actualiza el rol
+  form.roles = descomponerRoles(nuevoProfesor?.usuario?.rol);  // Actualiza los roles
 }, { immediate: true });  // Con 'immediate: true', se ejecutará también en la inicialización
 
 // Función para emitir el evento
@@ -70,7 +81,7 @@ function enviar() {
     idUsuario: props.profesor.usuario.id, // Usar el ID del profesor (usuario)
     nombre: props.profesor.nombre,          // Pasar el nombre del profesor (no del formulario)
     email: form.email,                      // Pasar el email desde el formulario
-    rol: form.rol,                          // Pasar el rol desde el formulario
+    rol: form.roles.join(','),              // Pasar los roles desde el formulario
     password: form.password || "",         // Si no hay contrasena, enviar una cadena vacia
   });
 }

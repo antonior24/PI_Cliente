@@ -59,7 +59,7 @@
           </li>
 
           <!-- DROPDOWN PARA ADMINISTRADOR -->
-          <li v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'" class="nav-item dropdown">
+          <li v-if="tieneRol(auth.usuario?.rol, 'administrador')" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
               data-bs-toggle="dropdown" aria-expanded="false">
               {{ t('menu.administration') }}
@@ -109,7 +109,7 @@
           </li>
 
           <!-- Descargar Horario PDF (solo si es profesor) -->
-          <li v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'" class="nav-item">
+          <li v-if="tieneRol(auth.usuario?.rol, 'profesor')" class="nav-item">
             <a class="nav-link" href="#" @click.prevent="descargarHorarioPDF">
               {{ t('menu.downloadSchedulePdf') }}
             </a>
@@ -198,6 +198,7 @@ import logo from '../assets/logo_iespsur.jpeg'
 import { ref, onMounted } from 'vue'
 import ModalMensaje from '../components/ModalMensaje.vue'
 import { useI18n } from '../composables/useI18n'
+import { tieneRol } from '../utils/roles'
 
 const imagenPerfil = ref(null)
 const cargando = ref(false)
