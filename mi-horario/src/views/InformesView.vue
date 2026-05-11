@@ -1,20 +1,24 @@
 <template>
   <div class="container-fluid mt-5 pt-4">
-    <h1 class="mb-4 text-center">{{ t('reports.reportsTitle') }}</h1>
+    <h1 class="mb-5 text-center">{{ t('reports.reportsTitle') }}</h1>
 
-    <!-- Filtro por Profesor (solo para administrador) -->
-    <div v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'" class="row mb-4">
+    <!-- Filtro por Profesor con búsqueda -->
+    <div v-if="profesores.length > 0" class="row mb-5">
       <div class="col-md-6 mx-auto">
-        <div class="card p-3">
-          <label for="selectProfesor" class="form-label">{{ t('reports.filterByProfessor') }}</label>
+        <div class="card p-4 shadow-sm border-primary">
+          <label for="selectProfesor" class="form-label fw-bold mb-3">
+            🔍 {{ t('reports.filterByProfessor') }}
+          </label>
+          
+          <!-- Desplegable simple con profesores -->
           <select 
             id="selectProfesor"
             v-model="profesorSeleccionado" 
-            class="form-select"
+            class="form-select form-select-lg mb-3"
             @change="cargarEstadisticas"
           >
-            <option value="">{{ t('reports.showAll') }}</option>
-            <option v-for="profesor in profesores" :key="profesor.id" :value="profesor.id">
+            <option :value="null">{{ t('reports.showAll') }}</option>
+            <option v-for="profesor in profesores" :key="obtenerIdProfesor(profesor)" :value="obtenerIdProfesor(profesor)">
               {{ profesor.nombre }}
             </option>
           </select>
@@ -22,91 +26,17 @@
       </div>
     </div>
 
-    <!-- Información del profesor seleccionado -->
-    <div v-if="profesorSeleccionado" class="alert alert-info mb-4">
-      <strong>{{ t('reports.selectedProfessor') }}</strong> {{ profesorNombreSeleccionado }}
-    </div>
-
-    <!-- Tarjetas de resumen -->
-    <div class="row mb-4">
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 bg-primary text-white">
-          <h5>{{ t('reports.totalEvents') }}</h5>
-          <p class="fs-3 mb-0">{{ estadisticas.totalEventos }}</p>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 bg-success text-white">
-          <h5>{{ t('reports.schedulesConsulted') }}</h5>
-          <p class="fs-3 mb-0">{{ estadisticas.horariosConsultados }}</p>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 bg-warning text-dark">
-          <h5>{{ t('reports.absencesRegistered') }}</h5>
-          <p class="fs-3 mb-0">{{ estadisticas.ausenciasRegistradas }}</p>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 bg-info text-white">
-          <h5>{{ t('reports.actionsPerformed') }}</h5>
-          <p class="fs-3 mb-0">{{ estadisticas.accionesRealizadas }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gráficos -->
+    <!-- Gráfico de Eventos por Tipo -->
     <div class="row">
-      <div class="col-md-6 mb-4">
+      <div class="col-md-8 mx-auto">
         <div class="card shadow-sm p-4">
-          <h5 class="card-title">{{ t('reports.eventsByType') }}</h5>
-          <div style="position: relative; height: 300px;">
+          <h5 class="card-title mb-4">📊 {{ t('reports.eventsByType') }}</h5>
+          <div style="position: relative; height: 350px;" v-show="hayDatos">
             <canvas id="graficoEventos"></canvas>
           </div>
-        </div>
-      </div>
-      <div class="col-md-6 mb-4">
-        <div class="card shadow-sm p-4">
-          <h5 class="card-title">{{ t('reports.activityByDay') }}</h5>
-          <div style="position: relative; height: 300px;">
-            <canvas id="graficoActividad"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabla de detalles -->
-    <div class="row mt-4">
-      <div class="col-12">
-        <div class="card shadow-sm p-4">
-          <h5 class="card-title">{{ t('reports.latestEvents') }}</h5>
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead class="table-dark">
-                <tr>
-                  <th>{{ t('reports.type') }}</th>
-                  <th>{{ t('reports.description') }}</th>
-                  <th>{{ t('reports.dateTime') }}</th>
-                  <th>{{ t('reports.details') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="evento in ultimosEventos" :key="evento.id">
-                  <td>
-                    <span class="badge" :class="`bg-${obtenerColorEvento(evento.tipo)}`">
-                      {{ evento.tipo }}
-                    </span>
-                  </td>
-                  <td>{{ evento.descripcion }}</td>
-                  <td>{{ formatearFecha(evento.fecha) }}</td>
-                  <td>{{ evento.detalles || '-' }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p v-if="ultimosEventos.length === 0" class="text-muted text-center mt-3">
-              {{ t('reports.noEventsRecorded') }}
-            </p>
-          </div>
+          <p v-if="!hayDatos" class="text-muted text-center mt-5 mb-5">
+            {{ t('reports.noDataAvailable') }}
+          </p>
         </div>
       </div>
     </div>
@@ -123,68 +53,50 @@ import { useI18n } from '../composables/useI18n'
 const auth = useAuthStore()
 const { t } = useI18n()
 const profesores = ref([])
-const profesorSeleccionado = ref('')
-const estadisticas = ref({
-  totalEventos: 0,
-  horariosConsultados: 0,
-  ausenciasRegistradas: 0,
-  accionesRealizadas: 0
-})
-const ultimosEventos = ref([])
+const profesorSeleccionado = ref(null)
 let chartEventos = null
-let chartActividad = null
+const hayDatos = ref(false)
 
-const profesorNombreSeleccionado = computed(() => {
-  if (!profesorSeleccionado.value) return 'Todos'
-  const profesor = profesores.value.find(p => p.id === profesorSeleccionado.value)
-  return profesor?.nombre || 'Desconocido'
-})
+function obtenerIdProfesor(profesor) {
+  return profesor?.idProfesor ?? profesor?.id ?? profesor?.profesorId ?? profesor?.id_profesor ?? null
+}
 
 onMounted(async () => {
-  // Si es administrador, cargar lista de profesores
+  // Cargar lista de profesores si es administrador
   if (auth.usuario?.rol?.toLowerCase() === 'administrador') {
     try {
       const response = await api.get('/profesores')
       profesores.value = response.data
+      console.log('✅ Profesores cargados:', profesores.value.length)
     } catch (error) {
-      console.error('Error cargando profesores:', error)
+      console.error('❌ Error cargando profesores:', error)
     }
   }
 
   cargarEstadisticas()
 })
 
-watch(profesorSeleccionado, () => {
-  cargarEstadisticas()
-})
-
 async function cargarEstadisticas() {
   try {
     const params = {}
-    if (profesorSeleccionado.value) {
-      params.profesorId = profesorSeleccionado.value
+    if (profesorSeleccionado.value !== null) {
+      params.profesorId = Number(profesorSeleccionado.value)
+      const profesor = profesores.value.find(p => obtenerIdProfesor(p) === Number(profesorSeleccionado.value))
+      console.log('📊 Cargando datos para:', profesor?.nombre, '(ID:', profesorSeleccionado.value + ')')
+    } else {
+      console.log('📊 Cargando datos para TODOS los profesores')
     }
 
     const response = await api.get('/tracking/stats', { params })
     const datos = response.data
 
-    // Actualizar estadísticas resumen
-    estadisticas.value = {
-      totalEventos: datos.totalEventos || 0,
-      horariosConsultados: (datos.porTipo?.find(t => t.tipo === 'horario_consultado')?.total || 0),
-      ausenciasRegistradas: (datos.porTipo?.find(t => t.tipo === 'ausencia_registrada')?.total || 0),
-      accionesRealizadas: (datos.porTipo?.find(t => t.tipo === 'accion_realizada')?.total || 0)
-    }
-
-    ultimosEventos.value = datos.ultimosEventos || []
+    console.log('📈 Datos recibidos del servidor:', datos)
 
     // Actualizar gráfico de eventos
     actualizarGraficoEventos(datos.porTipo || [])
-
-    // Actualizar gráfico de actividad
-    actualizarGraficoActividad(datos.porDia || [])
   } catch (error) {
-    console.error('Error cargando estadísticas:', error)
+    console.error('❌ Error cargando estadísticas:', error)
+    hayDatos.value = false
   }
 }
 
@@ -195,10 +107,14 @@ function actualizarGraficoEventos(datos) {
     chartEventos.destroy()
   }
 
-  if (datos.length === 0) {
-  ctx.parentElement.innerHTML = `<p class="text-muted text-center">${t('reports.noDataAvailable')}</p>`
+  if (!datos || datos.length === 0) {
+    hayDatos.value = false
+    console.log('⚠️ Sin datos para mostrar')
     return
   }
+
+  hayDatos.value = true
+  console.log('✅ Mostrando gráfico con', datos.length, 'tipos de eventos')
 
   chartEventos = new Chart(ctx, {
     type: 'doughnut',
@@ -216,95 +132,62 @@ function actualizarGraficoEventos(datos) {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'bottom'
+          position: 'bottom',
+          labels: {
+            font: { size: 13 },
+            padding: 20
+          }
         }
       }
     }
   })
 }
 
-function actualizarGraficoActividad(datos) {
-  const ctx = document.getElementById('graficoActividad')
-  
-  if (chartActividad) {
-    chartActividad.destroy()
-  }
-
-  if (datos.length === 0) {
-  ctx.parentElement.innerHTML = `<p class="text-muted text-center">${t('reports.noDataAvailable')}</p>`
-    return
-  }
-
-  chartActividad = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: datos.map(d => d.dia),
-      datasets: [{
-        label: 'Eventos',
-        data: datos.map(d => d.total),
-        backgroundColor: '#36A2EB',
-        borderColor: '#0056b3',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'top'
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  })
-}
-
-function obtenerColorEvento(tipo) {
-  const colores = {
-    'horario_consultado': 'success',
-    'ausencia_registrada': 'warning',
-    'accion_realizada': 'primary',
-    'default': 'secondary'
-  }
-  return colores[tipo] || colores['default']
-}
-
-function formatearFecha(fecha) {
-  return new Date(fecha).toLocaleString('es-ES', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+function limpiarFiltro() {
+  profesorSeleccionado.value = null
+  cargarEstadisticas()
+  console.log('🔄 Filtro limpiado - mostrando todos')
 }
 </script>
 
 <style scoped>
-.bg-primary { background-color: #0d6efd !important; }
-.bg-success { background-color: #198754 !important; }
-.bg-warning { background-color: #ffc107 !important; }
-.bg-info { background-color: #0dcaf0 !important; }
+.border-primary {
+  border-left: 4px solid #0d6efd !important;
+}
 
 .card {
   border-radius: 10px;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
 }
 
-.table-hover tbody tr:hover {
-  background-color: #f5f5f5;
+.form-select, .form-control {
+  border-radius: 8px;
+  border: 2px solid #dee2e6;
+  transition: all 0.3s ease;
 }
 
-.badge {
-  padding: 0.5rem 0.75rem;
+.form-select:focus, .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+h1 {
+  color: #0d6efd;
+  font-weight: 600;
+}
+
+.form-select-lg {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: white;
 }
 </style>
