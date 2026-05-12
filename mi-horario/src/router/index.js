@@ -15,6 +15,7 @@ import GuardiasView from '../views/GuardiasView.vue'
 import HorarioAIView from '../views/HorarioAIView.vue'
 import MisHorariosView from '../views/MisHorariosView.vue'
 import { useAuthStore } from '../stores/auth'
+import { tieneRol } from '../utils/roles'
 
 
 const routes = [
@@ -50,8 +51,7 @@ router.beforeEach((to, from, next) => {
       return
     }
 
-    const rolUsuario = String(auth.usuario?.rol || '').toLowerCase()
-    const tieneAcceso = requiereRoles.some(r => rolUsuario === String(r).toLowerCase())
+      const tieneAcceso = requiereRoles.some(r => tieneRol(auth.usuario?.rol, r))
 
     if (!tieneAcceso) {
       next('/home')

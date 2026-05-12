@@ -35,7 +35,7 @@
 
       <router-link to="/home" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">{{ t('modal.sidemenuHome') }}</router-link>
 
-      <div v-if="auth.usuario?.rol?.toLowerCase() === 'administrador'">
+      <div v-if="tieneRol(auth.usuario?.rol, 'administrador')">
         <router-link to="/subir-archivo" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">{{ t('modal.sidemenuUploadData') }}</router-link>
         <router-link to="/datos-profesorado" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">{{ t('modal.sidemenuTeacherData') }}</router-link>
         <button class="btn btn-primary w-100 mb-2" @click="generarParteDiario">
@@ -44,7 +44,7 @@
 
       </div>
 
-      <div v-if="auth.usuario?.rol?.toLowerCase() === 'profesor'">
+      <div v-if="tieneRol(auth.usuario?.rol, 'profesor')">
         <router-link to="/mis-horario" class="btn btn-primary w-100 mb-2" @click="cerrarOffcanvas">
           {{ t('modal.sidemenuMySchedules') }}
         </router-link>
@@ -79,6 +79,7 @@ import api from '../axios'
 import modalmensaje from '../components/ModalMensaje.vue'
 import Horario from '../components/Horario.vue'
 import { useI18n } from '../composables/useI18n'
+import { tieneRol } from '../utils/roles'
 
 
 // Estado del modal

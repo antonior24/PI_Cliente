@@ -93,6 +93,7 @@ import Horario from '../components/Horario.vue'
 import ModalCambioContraseña from '../components/ModalCambioContraseña.vue'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from '../composables/useI18n'
+import { tieneRol } from '../utils/roles'
 
 const auth = useAuthStore()
 const mostrarModal = ref(false)
@@ -105,8 +106,7 @@ const ausenciasConEstado = ref([])
 const cargandoGuardias = ref(false)
 
 const esProfesor = computed(() => {
-  const rol = auth.usuario?.rol
-  return Boolean(rol && String(rol).toLowerCase() === 'profesor')
+  return tieneRol(auth.usuario?.rol, 'profesor')
 })
 
 // Obtener fecha de hoy en formato YYYY-MM-DD

@@ -142,15 +142,14 @@ import axios from 'axios'
 import ModalMensaje from '../components/ModalMensaje.vue'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from '../composables/useI18n'
+import { tieneRol } from '../utils/roles'
 
 
 const auth = useAuthStore()
 const { t } = useI18n()
 
 const esAdmin = computed(() => {
-  const rol = auth.usuario?.rol
-  if (!rol) return false
-  return String(rol).toLowerCase() === 'administrador'
+  return tieneRol(auth.usuario?.rol, 'administrador')
 })
 
 
