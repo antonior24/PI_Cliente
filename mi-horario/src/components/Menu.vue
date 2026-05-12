@@ -80,12 +80,6 @@
                   {{ t('menu.reports') }}
                 </router-link>
               </li>
-              <li><hr class="dropdown-divider" /></li>
-              <li>
-                <a class="dropdown-item" href="#" @click.prevent="generarParteDiario">
-                  {{ t('menu.dailyReports') }}
-                </a>
-              </li>
             </ul>
           </li>
 
