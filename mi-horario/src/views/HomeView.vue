@@ -14,7 +14,7 @@
         <div class="col-12">
           <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-              <h5 class="mb-0">Ausencias disponibles para cubrir HOY</h5>
+              <h5 class="mb-0">{{ t('views.homeTodayCoverageTitle') }}</h5>
             </div>
             <div class="card-body">
               <div v-if="cargandoGuardias" class="text-center">
@@ -23,7 +23,7 @@
                 </div>
               </div>
               <div v-else-if="ausenciasConEstado.length === 0" class="alert alert-info text-center mb-0">
-                No hay ausencias para cubrir hoy
+                {{ t('views.homeNoAbsencesToday') }}
               </div>
               <div v-else class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
@@ -33,7 +33,7 @@
                       <th>{{ t('views.subject') }}</th>
                       <th>{{ t('views.guardHour') }}</th>
                       <th>{{ t('views.classroom') }}</th>
-                      <th>Estado de Cobertura</th>
+                      <th>{{ t('views.homeCoverageStatus') }}</th>
                       <th>{{ t('views.actions') }}</th>
                     </tr>
                   </thead>
@@ -47,11 +47,11 @@
                       </td>
                       <td>
                         <div v-if="ausencia.cubierta" class="d-flex align-items-center gap-2">
-                          <span class="badge bg-success">✅ Cubierta</span>
+                          <span class="badge bg-success">✅ {{ t('views.homeCovered') }}</span>
                           <small class="text-muted">{{ ausencia.profesorCobertura }}</small>
                         </div>
                         <div v-else class="text-danger">
-                          <small>Sin cubrir</small>
+                          <small>{{ t('views.homeUncovered') }}</small>
                         </div>
                       </td>
                       <td>
@@ -59,9 +59,9 @@
                           v-if="!ausencia.cubierta"
                           @click="registrarGuardiaDirecta(ausencia)" 
                           class="btn btn-sm btn-primary"
-                          title="Registrar guardia"
+                          :title="t('views.homeRegisterGuard')"
                         >
-                          Registrar
+                          {{ t('views.homeRegisterGuard') }}
                         </button>
                         <span v-else class="text-success">✓</span>
                       </td>
@@ -228,8 +228,8 @@ async function registrarGuardiaDirecta(ausencia) {
     await Promise.all([cargarAusenciasHoy(), cargarGuardiasDelDiaHoy()])
   } catch (error) {
     console.error('Error al registrar la guardia desde Inicio:', error)
-    const mensajeError = error.response?.data?.message || error.response?.data || 'No se pudo registrar la guardia'
-    alert(typeof mensajeError === 'string' ? mensajeError : 'No se pudo registrar la guardia')
+    const mensajeError = error.response?.data?.message || error.response?.data || t('views.homeRegisterGuardError')
+    alert(typeof mensajeError === 'string' ? mensajeError : t('views.homeRegisterGuardError'))
   }
 }
 
